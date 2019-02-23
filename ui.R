@@ -2,96 +2,71 @@ library(shiny)
 library(shinydashboard)
 library(shinyWidgets)
 library(shinyjs)
-library(shinyTime)
 library(DT)
 
 dashboardPage(
   dashboardHeader(
-    title = "Shiny Scorekeeper"),
+    title = "Shiny Scorekeeper"
+  ),
   
   # Sidebar -----------------------------------------------------------------
   
   dashboardSidebar(
     sidebarMenu(
       id = "tabs",
-      menuItem("Game Info", tabName = "game_info", icon = icon("calendar")),
-      menuItem("Roster", tabName = "roster", icon = icon("list")),
-      menuItem("Scorekeeper", tabName = "scorekeeper", icon = icon("basketball-ball")),
+      menuItem(text = "Roster", tabName = "roster", icon = icon("list")),
+      menuItem(text = "Scorekeeper", tabName = "scorekeeper", icon = icon("basketball-ball")),
       menuItem("Stats Viewer", tabName = "stats_viewer", icon = icon("chart-line")),
-      menuItem("About", tabName = "about", icon = icon("info-circle"))
+      menuItem("About", tabName = "about", icon = icon("info-circle")),
+      conditionalPanel(
+        condition = 'input.tabs == "scorekeeper"',
+        br(),
+        br(),
+        dateInput("game_date", "Date"),
+        textInput("opponent_name", "Opponent", placeholder = "Name", width = "100%"),
+        fluidRow(
+          tags$b(h4(align = "center", "Final score")),
+          column(width = 6, textInput("team_score", label = NULL, placeholder = "Team", width = "100%")),
+          column(width = 6, textInput("opp_score", label = NULL, placeholder = "Opp.", width = "100%"))
+        ),
+        br(),
+        p(align = "center", hidden(actionButton("save_game_info", "Save game info", icon = icon("save"))))
+      )
     )
   ),
   
   dashboardBody(
+    tags$style(".bttn-gradient.bttn-default  {color: #5D8CB9 !important;}"),
+    tags$style(HTML("hr {border-top: 1px solid #000000;}")),
     useSweetAlert(),
     useShinyjs(),  # Include shinyjs
     tabItems(
-      # Game Info -----------------------------------------------------------------
-      tabItem(tabName = "game_info",
-              fluidRow(
-                column(
-                  width = 7,
-                  fluidRow(
-                    column(width = 5, dateInput("game_date", "Date", width = "100%")),
-                    column(width = 5, timeInput("game_time", "Start time", seconds = FALSE)),
-                    column(width = 2)
-                  ),
-                  fluidRow(
-                    column(width = 10, textInput("season", "Season", placeholder = "2018-19 or Spring 2019", width = "100%")),
-                    column(width = 2)
-                  ),
-                  fluidRow(
-                    column(width = 7, textInput("team_name", "Team", placeholder = "Name", width = "100%")),
-                    column(width = 3, textInput("team_score", label = "Score", placeholder = "48")),
-                    column(width = 2)
-                  ),
-                  fluidRow(
-                    column(width = 7, textInput("opponent_name", "Opponent", placeholder = "Name", width = "100%")),
-                    column(width = 3, textInput("opponent_score", label = "Score", placeholder = "39")),
-                    column(width = 2)
-                  )
-                ),
-                column(width = 5)
-              )
-      ),
       # Roster -----------------------------------------------------------------
       tabItem(tabName = "roster",
-              actionButton('add_row', 'Add row'),
-              fluidRow(column(12, h1('Server-side processing'), hr(), DTOutput("x2", width = "50%"))),
               fluidRow(
                 column(
                   width = 7,
-                  radioGroupButtons(inputId = "roster_type", label = NULL, justified = TRUE,
-                                    choices = c("Enter roster", "Upload roster")),
-                  conditionalPanel(
-                    condition = 'input.roster_type == "Enter roster"',
-                    fluidRow(
-                      column(width = 9,
-                             textInput(inputId = "name_1", label = NULL, value = "", placeholder = "Name"),
-                             tags$div(id = "player_names")),
-                      column(width = 3,
-                             textInput(inputId = "num_1", label = NULL, value = "", placeholder = "00"),
-                             tags$div(id = "player_nums"))
-                    ),
-                    fluidRow(
-                      column(width = 6, actionButton("add_btn", "Add row", width = "100%")),
-                      column(width = 6, actionButton("remove_btn", "Remove row", width = "100%"))
-                    ),
-                    br()
-                  ),
-                  conditionalPanel(
-                    condition = 'input.roster_type == "Upload roster"',
-                    fileInput("roster_upload", label = NULL, width = "100%", 
-                              accept = c("text/csv", "text/comma-separated-values,text/plain", ".csv")),
-                    tableOutput("rosterTable")
-                  ),
-                  p(align = "center", hidden(actionButton("set_roster", "Set roster", icon = icon("cogs")))),
-                  conditionalPanel(
-                    condition = 'input.roster_type == "Enter roster"',
-                    p(align = "center", hidden(downloadButton("downloadRoster", "Download roster")))
-                  )
+                  DTOutput("teamsTable"),
+                  actionButton("add_teams_row", "Add row", icon = icon("plus-square")),
+                  hidden(actionButton("delete_teams_row", "Delete selected row", icon = icon("trash"))),
+                  hr(),
+                  h4(id = "select_row_msg", align = "center", "Select row in table above to view and edit roster"),
+                  uiOutput("previousPlayers"),
+                  hidden(actionButton("add_selected_players", "Add selected players", icon = icon("plus-square"))),
+                  br(),
+                  hidden(DTOutput("rosterTable")),
+                  hidden(actionButton("add_roster_row", "Add row", icon = icon("plus-square"))),
+                  hidden(actionButton("delete_roster_row", "Delete selected row", icon = icon("trash")))
                 ),
-                column(width = 5)
+                
+                column(width = 5,
+                       h4("Click on table to select row"),
+                       h4("Double click to edit table cell"),
+                       br(),
+                       hidden(actionButton("save_teams_roster_changes", "Save changes", icon = icon("save"))),
+                       hidden(actionButton("set_roster", "Set roster", icon = icon("edit")))
+                       # downloadButton(outputId = "exportRosters", label = "Export rosters")
+                )
               )
       ),
       # Scorekeeper -----------------------------------------------------------------
@@ -143,13 +118,16 @@ dashboardPage(
                 ),
                 column(width = 3, 
                        uiOutput("selectedPlayer"),
-                       p(align = "center", hidden(downloadButton(outputId = "downloadGameFile", label = "Download game file"))),
+                       hidden(h4(id = "roster_msg", "Select players on court from roster on left")),
+                       uiOutput("DNP"),
+                       # uiOutput("DNP_CD"),
+                       br(),
+                       hidden(actionButton("save_game_stats", "Save game stats", icon = icon("save"), width = "100%")),
                        br(),
                        br(),
                        br(),
-                       br(),
-                       hidden(switchInput("undo", label = "UNDO", size = "large", width = "100%"))
-                       )
+                       hidden(switchInput("undo", label = "UNDO", size = "large"))
+                )
               ),
               fluidRow(
                 valueBoxOutput("pts", width = 2),
@@ -170,7 +148,27 @@ dashboardPage(
       ),
       # Stats Viewer -----------------------------------------------------------------
       tabItem(tabName = "stats_viewer",
-              h2("Stats Viewer tab content")
+              fluidRow(
+                column(width = 5,
+                       h3("Seasons"),
+                       actionButton('seasons_selectall', 'Select all'),
+                       actionButton('seasons_deselectall', 'Deselect all'),
+                       DTOutput("teamsTableStatsViewer")
+                ),
+                column(width = 7,
+                       h3("Games"),
+                       hidden(actionButton('games_selectall', 'Select all')),
+                       hidden(actionButton('games_deselectall', 'Deselect all')),
+                       h4(id = "select_teams_row_msg", "Select row(s) in Seasons table on left to view games"),
+                       DTOutput("gamesTable")
+                )
+              ),
+              br(),
+              h3("Statistics"),
+              h4(textOutput("statisticsMessage")),
+              uiOutput("selectedPlayers"),
+              hidden(radioGroupButtons(inputId = "stats_type", label = NULL, choices = c("Per game", "Total"))),
+              DTOutput("statisticsTable")
       ),
       tabItem(tabName = "about",
               h2("About tab content"),
