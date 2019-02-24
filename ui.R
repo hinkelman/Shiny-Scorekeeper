@@ -150,16 +150,16 @@ dashboardPage(
       tabItem(tabName = "stats_viewer",
               fluidRow(
                 column(width = 5,
-                       h3("Seasons"),
-                       actionButton('seasons_selectall', 'Select all'),
-                       actionButton('seasons_deselectall', 'Deselect all'),
+                       h3("Teams"),
+                       actionButton('teams_selectall', 'Select all'),
+                       actionButton('teams_deselectall', 'Deselect all'),
                        DTOutput("teamsTableStatsViewer")
                 ),
                 column(width = 7,
                        h3("Games"),
                        hidden(actionButton('games_selectall', 'Select all')),
                        hidden(actionButton('games_deselectall', 'Deselect all')),
-                       h4(id = "select_teams_row_msg", "Select row(s) in Seasons table on left to view games"),
+                       h4(id = "select_teams_row_msg", "Select row(s) in Teams table on left to view games"),
                        DTOutput("gamesTable")
                 )
               ),
@@ -171,7 +171,6 @@ dashboardPage(
               DTOutput("statisticsTable")
       ),
       tabItem(tabName = "about",
-              h2("About tab content"),
               includeMarkdown("about.md")
       )
     )

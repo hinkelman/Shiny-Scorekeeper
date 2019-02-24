@@ -337,8 +337,8 @@ function(input, output, session) {
                TeamID = rv[["roster"]]$TeamID[1], # same TeamID for all rows in roster 
                Date = as.character(input$game_date), 
                Opponent = input$opponent_name, 
-               TeamScore = input$team_score, 
-               OpponentScore = input$opp_score,
+               TeamScore = as.numeric(input$team_score), 
+               OpponentScore = as.numeric(input$opp_score),
                stringsAsFactors = FALSE)
   })
   
@@ -381,7 +381,7 @@ function(input, output, session) {
   
   output$DNP <- renderUI({
     # did not play
-    pickerInput(inputId = "dnp", label = "DNP", choices = numName(), multiple = TRUE)
+    pickerInput(inputId = "dnp", label = "Did Not Play (DNP)", choices = numName(), multiple = TRUE)
   })
   
   # output$DNP_CD <- renderUI({
@@ -648,7 +648,7 @@ function(input, output, session) {
   
   output$statisticsMessage <- renderText({
     out = ""
-    if (is.null(input$teamsTableStatsViewer_rows_selected) & is.null(input$gamesTable_rows_selected)) out = "Select row(s) in Seasons and Games tables above to view statistics"
+    if (is.null(input$teamsTableStatsViewer_rows_selected) & is.null(input$gamesTable_rows_selected)) out = "Select row(s) in Teams and Games tables above to view statistics"
     if (is.null(input$gamesTable_rows_selected)) out = "Select row(s) in Games table above to view statistics"
     return(out)
   })
@@ -656,29 +656,30 @@ function(input, output, session) {
   output$teamsTableStatsViewer = renderDT(
     rv[["teams"]], selection = "multiple",
     style = "bootstrap", rownames = FALSE,
-    options = list(pageLength = 5, bLengthChange = FALSE, bPaginate = TRUE, searching = FALSE, 
+    options = list(pageLength = 5, bLengthChange = FALSE, bPaginate = TRUE, searching = FALSE, scrollX = TRUE,
                    columnDefs = list(list(visible = FALSE, targets = 0)))) # hide TeamID column
   
   proxyTeamsTableStatsViewer = dataTableProxy("teamsTableStatsViewer")
   
-  observeEvent(input$seasons_selectall, {
+  observeEvent(input$teams_selectall, {
     proxyTeamsTableStatsViewer %>% selectRows(1:nrow(rv[["teams"]]))
   })
   
-  observeEvent(input$seasons_deselectall, {
+  observeEvent(input$teams_deselectall, {
     proxyTeamsTableStatsViewer %>% selectRows(NULL)
   })
   
   gamesDisplay <- reactive({
     req(input$teamsTableStatsViewer_rows_selected)
     ti = rv[["teams"]]$TeamID[input$teamsTableStatsViewer_rows_selected]
-    filter(rv[["games"]], TeamID %in% ti)
+    filter(rv[["games"]], TeamID %in% ti) %>% 
+      mutate(Margin = TeamScore - OpponentScore)
   })
   
   output$gamesTable = renderDT(
     gamesDisplay(), selection = "multiple", 
     style = "bootstrap", rownames = FALSE,
-    options = list(pageLength = 5, bLengthChange = FALSE, bPaginate = TRUE, searching = FALSE,
+    options = list(pageLength = 5, bLengthChange = FALSE, bPaginate = TRUE, searching = FALSE, scrollX = TRUE,
                    columnDefs = list(list(visible = FALSE, targets = c(0,1))))) # hide GameID and TeamID columns
   
   proxyGamesTable = dataTableProxy("gamesTable")
@@ -763,7 +764,6 @@ function(input, output, session) {
         mutate(Player = paste(FirstName, LastName)) %>% 
         select(Team, Player, GP, PTS, FGM = FGM23, FGA = FGA23, `FG%`, `3PM` = FGM3, `3PA` = FGA3, `3P%`, FTM, FTA, `FT%`, `TS%`, OREB, DREB, REB, AST, TOV, STL, BLK, PF, EFF)
       if (input$stats_type == "Per game") d = select(d, -GP)
-      str(d)
     }
     return(d)
   })
