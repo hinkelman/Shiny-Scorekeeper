@@ -1,4 +1,6 @@
 
+<a href="https://www.travishinkelman.com/project/shiny-scorekeeper/" target="_blank">Shiny Scorekeeper</a> is a basketball scorekeeper app built with the Shiny web framework for R. All of the code for the app is available on <a href="https://github.com/hinkelman/Shiny-Scorekeeper" target="_blank">GitHub.</a> The app is designed for use on a desktop computer while watching film of a game, i.e., not intended for mobile use at a live game. Below are brief instructions on how to use the key features of the app.
+
 #### Create and Set Roster
 
 Initially, the Teams table is empty. Add a row and double-click on cells to edit the placeholder values. Selecting a row in the Teams table brings up the Roster table. Add rows and double-click on cells to edit the placeholder values to fill out the roster. Players previously entered on rosters for other teams can be selected from a dropdown menu to add to a roster. Players are linked to multiple teams via a hidden PlayerID column. Updating a linked player's name on one team will update the player's name on all teams. The same player can have different numbers on different teams. The application detects unsaved changes to the tables. Save changes to enable setting a roster for use in scoring a game.

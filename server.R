@@ -261,7 +261,7 @@ function(input, output, session) {
     cond = (isTRUE(all_equal(players, rv[["players"]])) | isTRUE(all_equal(rosters, rv[["rosters"]])) | isTRUE(all_equal(teams, rv[["teams"]])))
     toggle("set_roster", condition = cond & !is.null(input$teamsTable_rows_selected))
     # toggle("exportRosters", condition = cond)
-    toggle("save_teams_roster_changes", condition = !isTRUE(all_equal(rosters, rv[["rosters"]])) | !isTRUE(all_equal(teams, rv[["teams"]])))
+    toggle("save_teams_roster_changes", condition = !isTRUE(all_equal(players, rv[["players"]])) | !isTRUE(all_equal(rosters, rv[["rosters"]])) | !isTRUE(all_equal(teams, rv[["teams"]])))
   })
   
   observeEvent(input$save_teams_roster_changes,{

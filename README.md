@@ -2,7 +2,7 @@
 
 # Shiny Scorekeeper
 
-
+Shiny Scorekeeper is a basketball scorekeeper app built with the Shiny web framework for R. The app is a hobby project that I took on as a learning exercise. It is likely only of interest to a small subset of people building Shiny apps. 
 
 ### Installation
 
@@ -18,6 +18,8 @@ install.packages(c("shiny", "shinydashboard", "shinyWidgets", "shinyjs", "DT", "
 ```
 shiny::runApp()
 ```
+
+Instructions for how to use the app are found [here.](https://github.com/hinkelman/Shiny-Scorekeeper/blob/master/about.md)
 
 
 
