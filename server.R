@@ -64,36 +64,10 @@ function(input, output, session) {
     replaceData(proxyTeams, rv[["teams"]], resetPaging = FALSE, rownames = FALSE)  # important
   })
   
-  # * add row ---------------------------------------------------------
-  
-  observeEvent(input$add_teams_row,{
-    #addRow() only works when server = FALSE
-    req(rv[["teams"]])
-    
-    # update master list of team IDs
-    tid = nrow(teamIDs) + 1L # ID and now number are the same
-    teamIDs[tid,] <<- tid
-    write.csv(teamIDs, paste0(data_fldr, "TeamIDs.csv"), row.names = FALSE)
-    
-    # update master list of player IDs
-    pid = nrow(playerIDs) + 1L # ID and now number are the same
-    playerIDs[pid,] <<- pid
-    write.csv(playerIDs, paste0(data_fldr, "PlayerIDs.csv"), row.names = FALSE)
-    
-    # update all of the relevant tables
-    ti = nrow(rv[["teams"]]) + 1L
-    rv[["teams"]][ti,] = list(tid, sample(ex_seasons, 1), sample(ex_leagues, 1), sample(ex_coaches, 1))
-    ri = nrow(rv[["rosters"]]) + 1L
-    rv[["rosters"]][ri,] = list(tid, pid, sample(ex_nums, 1))
-    pi = nrow(rv[["players"]]) + 1L
-    rv[["players"]][pi,] = list(pid, sample(ex_names, 1), "")
-    replaceData(proxyTeams, rv[["teams"]], resetPaging = FALSE, rownames = FALSE)  # important
-  })
-  
   # * delete row ---------------------------------------------------------
   
   observe({
-    toggle("delete_teams_row", condition = nrow(rv[["teams"]]) > 1 & !is.null(input$teamsTable_rows_selected))
+    toggle("delete_teams_row", condition = nrow(rv[["teams"]]) > 0 & !is.null(input$teamsTable_rows_selected))
   })
   
   observeEvent(input$delete_teams_row,{
@@ -107,6 +81,32 @@ function(input, output, session) {
     replaceData(proxyTeams, rv[["teams"]], resetPaging = FALSE, rownames = FALSE)  # important
   })
   
+  # * add row ---------------------------------------------------------
+  
+  observeEvent(input$add_teams_row,{
+    #addRow() only works when server = FALSE
+    req(rv[["teams"]])
+    
+    # update master list of team IDs
+    tid = nrow(teamIDs) + 1L # ID and row number are the same
+    teamIDs[tid,] <<- tid
+    write.csv(teamIDs, paste0(data_fldr, "TeamIDs.csv"), row.names = FALSE)
+    
+    # update master list of player IDs
+    pid = nrow(playerIDs) + 1L # ID and row number are the same
+    playerIDs[pid,] <<- pid
+    write.csv(playerIDs, paste0(data_fldr, "PlayerIDs.csv"), row.names = FALSE)
+    
+    # update all of the relevant tables
+    ti = nrow(rv[["teams"]]) + 1L
+    rv[["teams"]][ti,] = list(tid, sample(ex_seasons, 1), sample(ex_leagues, 1), sample(ex_coaches, 1))
+    ri = nrow(rv[["rosters"]]) + 1L
+    rv[["rosters"]][ri,] = list(tid, pid, sample(ex_nums, 1))
+    pi = nrow(rv[["players"]]) + 1L
+    rv[["players"]][pi,] = list(pid, sample(ex_names, 1), "")
+    replaceData(proxyTeams, rv[["teams"]], resetPaging = FALSE, rownames = FALSE)  # important
+  })
+  
   # Roster ---------------------------------------------------------
   
   # * table ---------------------------------------------------------
@@ -116,6 +116,8 @@ function(input, output, session) {
     style = "bootstrap", rownames = FALSE,
     options = list(searching = FALSE, bPaginate = FALSE, info = FALSE,
                    columnDefs = list(list(visible = FALSE, targets = c(0,1))))) # hide TeamID and PlayerID columns
+  
+  proxyRoster = dataTableProxy("rosterTable")
   
   observe({
     toggle("select_row_msg", condition = is.null(input$teamsTable_rows_selected))
@@ -130,15 +132,13 @@ function(input, output, session) {
     replaceData(proxyRoster, rv[["roster"]], resetPaging = FALSE, rownames = FALSE)  # important
   })
   
-  proxyRoster = dataTableProxy("rosterTable")
-  
   # * dynamic UI ---------------------------------------------------------
   
   observe({
     req(rv[["roster"]])
     toggle("rosterTable", condition = !is.null(input$teamsTable_rows_selected))
     toggle("add_roster_row", condition = !is.null(input$teamsTable_rows_selected))
-    toggle("delete_roster_row", condition = nrow(rv[["roster"]]) > 1 & !is.null(input$rosterTable_rows_selected))
+    toggle("delete_roster_row", condition = nrow(rv[["roster"]]) > 0 & !is.null(input$rosterTable_rows_selected))
   })
   
   # * edit cell ---------------------------------------------------------
@@ -167,7 +167,7 @@ function(input, output, session) {
       rv[["players"]][pi, cn] = coerceValue(v, rv[["players"]][pi, cn])
     }
     
-    rv[["roster"]] = rv[["rosters"]] %>% # rebuild rv$roster; another heavy handed approach
+    rv[["roster"]] = rv[["rosters"]] %>% # rebuild rv$roster
       filter(TeamID == tid) %>% 
       left_join(rv[["players"]], by = "PlayerID")
     
@@ -181,7 +181,7 @@ function(input, output, session) {
     req(rv[["roster"]])
     
     # update master list of player IDs
-    pid = nrow(playerIDs) + 1L # ID and now number are the same
+    pid = nrow(playerIDs) + 1L # ID and row number are the same
     playerIDs[pid,] <<- pid
     write.csv(playerIDs, paste0(data_fldr, "PlayerIDs.csv"), row.names = FALSE)
     
@@ -257,7 +257,7 @@ function(input, output, session) {
   # * show/hide save button ---------------------------------------------------------
   
   observe({
-    input$save_teams_roster_changes # take dependency on save button
+    input$save_teams_roster_changes # take dependency on save button to hide button after saving
     cond = (isTRUE(all_equal(players, rv[["players"]])) | isTRUE(all_equal(rosters, rv[["rosters"]])) | isTRUE(all_equal(teams, rv[["teams"]])))
     toggle("set_roster", condition = cond & !is.null(input$teamsTable_rows_selected))
     # toggle("exportRosters", condition = cond)
