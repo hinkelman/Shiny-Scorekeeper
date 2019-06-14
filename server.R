@@ -230,7 +230,9 @@ function(input, output, session) {
     
     picker.ids = d[["PlayerID"]]
     names(picker.ids) = d[["PlayerName"]]
-    pickerInput("selected_players", "Select previous players", choices = picker.ids, multiple = TRUE)
+    pickerInput("selected_players", "Select previous players", 
+                choices = picker.ids, multiple = TRUE,
+                options = list(`live-search` = TRUE))
   })
   
   observe({
@@ -425,7 +427,7 @@ function(input, output, session) {
     which(rv[["game_stats_raw"]]$NumName == input$selected_player)
   })
   
-  ## tried this more functional approach, but yielded "Error in : promise already under evaluation: recursive default argument reference or earlier problems?"
+  ## tried this approach but yielded "Error in : promise already under evaluation: recursive default argument reference or earlier problems?"
   ## leads to redundant code below
   # updateGameStats <- function(data = rv[["game_stats_raw"]], ri = rowIndex(), change = change(), columns){
   #   for (i in columns){
