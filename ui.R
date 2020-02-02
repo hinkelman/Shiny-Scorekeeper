@@ -1,7 +1,6 @@
 dashboardPage(
-  dashboardHeader(
-    title = "Shiny Scorekeeper"
-  ),
+
+  dashboardHeader(title = "Shiny Scorekeeper"),
   
   # Sidebar -----------------------------------------------------------------
   
@@ -168,6 +167,7 @@ dashboardPage(
               br()
       ),
       tabItem(tabName = "about",
+              includeCSS("custom-css.css"),
               includeMarkdown("about.md")
       )
     )
