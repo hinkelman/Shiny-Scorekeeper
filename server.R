@@ -1,11 +1,7 @@
-library(dplyr)
-library(tidyr)
 
 function(input, output, session) {
   
   # Source functions ---------------------------------------------------------
-  
-  source("functions.R")
   
   # Example input ---------------------------------------------------------
   
@@ -36,9 +32,14 @@ function(input, output, session) {
   
   # Reactive values ---------------------------------------------------------
   
-  rv <- reactiveValues(teams = teams, players = players, 
+  # rv <- reactiveValues(teams = teams, players = players, 
+  #                      rosters = rosters, roster = NULL, 
+  #                      game_id = NULL, games = games,
+  #                      game_stats = game_stats, game_stats_raw = NULL, game_stats_calc = NULL)
+  
+  rv <- reactiveValues(teams = arrange(teams, desc(Season)), players = players, 
                        rosters = rosters, roster = NULL, 
-                       game_id = NULL, games = games,
+                       game_id = NULL, games = arrange(games, desc(Date)),
                        game_stats = game_stats, game_stats_raw = NULL, game_stats_calc = NULL)
   
   # Teams ---------------------------------------------------------
@@ -641,11 +642,17 @@ function(input, output, session) {
   # Stats Viewer ---------------------------------------------------------
   
   observe({
-    toggle("select_teams_row_msg", condition = is.null(input$teamsTableStatsViewer_rows_selected))
-    toggle("games_selectall", condition = !is.null(input$teamsTableStatsViewer_rows_selected))
-    toggle("games_deselectall", condition = !is.null(input$teamsTableStatsViewer_rows_selected))
+    cond <- is.null(input$teamsTableStatsViewer_rows_selected)
+    toggle("select_teams_row_msg", condition = cond)
+    toggle("games_selectall", condition = !cond)
+    toggle("games_deselectall", condition = !cond)
     # toggle("select_games_row_msg", condition = is.null(input$teamsTableStatsViewer_rows_selected) | is.null(input$gamesTable_rows_selected))
-    toggle("stats_type", condition = !is.null(input$teamsTableStatsViewer_rows_selected) & !is.null(input$gamesTable_rows_selected))
+  })
+  
+  observe({
+    cond <- !is.null(input$teamsTableStatsViewer_rows_selected) & !is.null(input$gamesTable_rows_selected)
+    toggle("stats_type", condition = cond)
+    toggle("stats_group_by", condition = cond)
   })
   
   output$statisticsMessage <- renderText({
@@ -701,7 +708,7 @@ function(input, output, session) {
   })
   
   output$selectedPlayers <- renderUI({
-    req(nrow(playersDisplay()) > 0) # at least one player that could be selected
+    req(!is.null(input$gamesTable_rows_selected) & nrow(playersDisplay()) > 0 & "PlayerID" %in% input$stats_group_by) 
     
     d <- playersDisplay() %>% 
       select(PlayerID, FirstName, LastName) %>% 
@@ -711,7 +718,7 @@ function(input, output, session) {
     
     picker.ids <- d[["PlayerID"]]
     names(picker.ids) <- d[["PlayerName"]]
-    pickerInput("selected_players_stats", "Select players", choices = picker.ids, multiple = TRUE,
+    pickerInput("selected_players_stats", "Select players", choices = picker.ids, multiple = TRUE, selected = picker.ids,
                 options = list(`actions-box` = TRUE))
   })
   
@@ -719,57 +726,84 @@ function(input, output, session) {
     req(input$teamsTableStatsViewer_rows_selected, input$gamesTable_rows_selected)
     ti <- gamesDisplay()$TeamID[input$gamesTable_rows_selected]
     gi <- gamesDisplay()$GameID[input$gamesTable_rows_selected]
+    
+    gms <- rv[["game_stats"]] %>% 
+      group_by_at(input$stats_group_by) %>% 
+      summarise(Games = length(unique(GameID)))
     d <- rv[["game_stats"]] %>% 
-      filter(TeamID %in% ti & GameID %in% gi) %>% 
+      filter(TeamID %in% ti & GameID %in% gi & PlayerID %in% input$selected_players_stats) %>% 
       mutate(PTS = FTM + FGM * 2 + FGM3 * 3,
              FGM23 = FGM + FGM3,
-             FGA23 = FGA + FGA3,
-             GP = abs(DNP - 1))
-    if (is.null(input$selected_players_stats)){ # if no players selected group by teams; no grouping by games, i.e., games always summarized
-      gms <- d %>% 
-        group_by(TeamID) %>% 
-        summarise(Games = length(unique(GameID)))
-      d <- d %>% 
-        group_by(TeamID) %>% 
-        summarise_all(sum, na.rm = TRUE) %>% 
-        left_join(gms, by = "TeamID")
-      if (input$stats_type == "Per game") d <- mutate_at(d, vars(-TeamID), list(~round(. / Games, 2))) 
-    }else{
-      d <- d %>% 
-        filter(PlayerID %in% input$selected_players_stats) %>% 
-        group_by(TeamID, PlayerID) %>% 
-        summarise_all(sum, na.rm = TRUE)
-      if (input$stats_type == "Per game") d <- mutate_at(d, vars(-TeamID, -PlayerID), list(~round(. / GP, 2)))
-    }
+             FGA23 = FGA + FGA3) %>% 
+      # GP = abs(DNP - 1)) %>% # can't remember why this works...
+      group_by_at(input$stats_group_by) %>% 
+      summarise_all(sum, na.rm = TRUE) %>% 
+      left_join(gms, by = input$stats_group_by) %>% 
+      mutate(GP = Games - DNP)
+    if (input$stats_type == "Per game"){
+      d <- mutate_at(d, vars(-all_of(input$stats_group_by)), 
+                     list(~round(. / ifelse("PlayerID" %in% input$stats_group_by, GP, Games), 2)))
+    } 
     return(d)
   })
   
   statisticsDisplay <- reactive({
+    req(input$stats_group_by)
+    # probably a fancier way to do this, but starting with brute force
+    grps <- input$stats_group_by
     d <- statistics() %>% 
       ungroup() %>% 
-      left_join(rv[["teams"]], by = "TeamID") %>% 
-      mutate(Team = paste0(Season, " (", Coach, ")"),
-             PTS = FTM + FGM * 2 + FGM3 * 3,
+      select(-stats_group_by_opts[!(stats_group_by_opts %in% grps)]) %>% # drop unselected group by columns
+      mutate(PTS = FTM + FGM * 2 + FGM3 * 3,
              FGM23 = FGM + FGM3,
              FGA23 = FGA + FGA3,
              `FT%` = round(FTM/FTA*100),
              `FG%` = round(FGM23/FGA23*100),
              `3P%` = round(FGM3/FGA3*100),
-             `TS%` = round(PTS/(0.88 * FTA + 2 * (FGA + FGA3))*100),
-             EFF = (PTS + REB + AST + STL + BLK - (FGA + FGA3 - FGM - FGM3) - (FTA - FTM) - TOV))
-    if (is.null(input$selected_players_stats)){
-      d <- select(d, Team, Games, PTS, FGM = FGM23, FGA = FGA23, `FG%`, `3PM` = FGM3, `3PA` = FGA3, `3P%`, FTM, FTA, `FT%`, `TS%`, OREB, DREB, REB, AST, TOV, STL, BLK, PF, EFF)
-      if (input$stats_type == "Per game") d <- select(d, -Games)
-    }else{
+             `TS%` = round(PTS/(0.88 * FTA + 2 * (FGA + FGA3))*100))
+    if ("TeamID" %in% grps){
       d <- d %>% 
-        left_join(rv[["players"]], by = "PlayerID") %>% 
-        mutate(Player = paste(FirstName, LastName)) %>% 
-        select(Team, Player, GP, PTS, FGM = FGM23, FGA = FGA23, `FG%`, `3PM` = FGM3, `3PA` = FGA3, `3P%`, FTM, FTA, `FT%`, `TS%`, OREB, DREB, REB, AST, TOV, STL, BLK, PF, EFF)
+        left_join(rv[["teams"]]) %>% 
+        mutate(Team = paste0(Season, " (", Coach, ")"))
+    }
+    if ("GameID" %in% grps){
+      d <- d %>% 
+        left_join(rv[["games"]])
+    }
+    if ("PlayerID" %in% grps){
+      d <- d %>% 
+        left_join(rv[["players"]]) %>% 
+        mutate(Player = FirstName,
+               EFF = round((PTS + REB + AST + STL + BLK - (FGA + FGA3 - FGM - FGM3) - (FTA - FTM) - TOV), 2))
+    }
+    
+    if (all(c("TeamID", "GameID", "PlayerID") %in% grps)){
+      d <- select(d, Team, Date, Opponent, Player, GP, PTS, FGM = FGM23, FGA = FGA23, `FG%`, `3PM` = FGM3, `3PA` = FGA3, `3P%`, FTM, FTA, `FT%`, `TS%`, OREB, DREB, REB, AST, TOV, STL, BLK, PF, EFF)
+    }
+    if ("TeamID" %in% grps && "GameID" %in% grps && !("PlayerID" %in% grps)){
+      d <- select(d, Team, Date, Opponent, PTS, FGM = FGM23, FGA = FGA23, `FG%`, `3PM` = FGM3, `3PA` = FGA3, `3P%`, FTM, FTA, `FT%`, `TS%`, OREB, DREB, REB, AST, TOV, STL, BLK, PF)
+    }
+    if (!("TeamID" %in% grps) && "GameID" %in% grps && !("PlayerID" %in% grps)){
+      d <- select(d, Date, Opponent, PTS, FGM = FGM23, FGA = FGA23, `FG%`, `3PM` = FGM3, `3PA` = FGA3, `3P%`, FTM, FTA, `FT%`, `TS%`, OREB, DREB, REB, AST, TOV, STL, BLK, PF)
+    }
+    if ("TeamID" %in% grps && !("GameID" %in% grps) && !("PlayerID" %in% grps)){
+      d <- select(d, Team, Games, PTS, FGM = FGM23, FGA = FGA23, `FG%`, `3PM` = FGM3, `3PA` = FGA3, `3P%`, FTM, FTA, `FT%`, `TS%`, OREB, DREB, REB, AST, TOV, STL, BLK, PF)
+      if (input$stats_type == "Per game") d <- select(d, -Games)
+    }
+    if (!("TeamID" %in% grps) && !("GameID" %in% grps) && "PlayerID" %in% grps){
+      d <- select(d, Player, GP, PTS, FGM = FGM23, FGA = FGA23, `FG%`, `3PM` = FGM3, `3PA` = FGA3, `3P%`, FTM, FTA, `FT%`, `TS%`, OREB, DREB, REB, AST, TOV, STL, BLK, PF, EFF)
+      if (input$stats_type == "Per game") d <- select(d, -GP)
+    }
+    if ("TeamID" %in% grps && !("GameID" %in% grps) && "PlayerID" %in% grps){
+      d <- select(d, Team, Player, GP, PTS, FGM = FGM23, FGA = FGA23, `FG%`, `3PM` = FGM3, `3PA` = FGA3, `3P%`, FTM, FTA, `FT%`, `TS%`, OREB, DREB, REB, AST, TOV, STL, BLK, PF, EFF)
+      if (input$stats_type == "Per game") d <- select(d, -GP)
+    }
+    if (!("TeamID" %in% grps) && "GameID" %in% grps && "PlayerID" %in% grps){
+      d <- select(d, Date, Opponent, Player, GP, PTS, FGM = FGM23, FGA = FGA23, `FG%`, `3PM` = FGM3, `3PA` = FGA3, `3P%`, FTM, FTA, `FT%`, `TS%`, OREB, DREB, REB, AST, TOV, STL, BLK, PF, EFF)
       if (input$stats_type == "Per game") d <- select(d, -GP)
     }
     return(d)
   })
-  
   
   output$statisticsTable <- renderDT(
     statisticsDisplay(), selection = "single",   

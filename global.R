@@ -1,3 +1,12 @@
+library(shiny)
+library(shinydashboard)
+library(shinyWidgets)
+library(shinyjs)
+library(DT)
+library(dplyr)
+library(tidyr)
+
+stats_group_by_opts <- c("Team" = "TeamID", "Game" = "GameID", "Player" = "PlayerID")
 
 create_name <- function(name, num){
   ifelse(num == "" | is.na(num), name,

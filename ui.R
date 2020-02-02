@@ -1,9 +1,3 @@
-library(shiny)
-library(shinydashboard)
-library(shinyWidgets)
-library(shinyjs)
-library(DT)
-
 dashboardPage(
   dashboardHeader(
     title = "Shiny Scorekeeper"
@@ -166,9 +160,12 @@ dashboardPage(
               br(),
               h3("Statistics"),
               h4(textOutput("statisticsMessage")),
+              hidden(pickerInput("stats_group_by", "Group by", choices = stats_group_by_opts, 
+                                 multiple = TRUE, selected = stats_group_by_opts)),
               uiOutput("selectedPlayers"),
-              hidden(radioGroupButtons(inputId = "stats_type", label = NULL, choices = c("Per game", "Total"))),
-              DTOutput("statisticsTable")
+              hidden(radioGroupButtons(inputId = "stats_type", label = NULL, choices = c("Per game", "Total"))),    
+              DTOutput("statisticsTable"),
+              br()
       ),
       tabItem(tabName = "about",
               includeMarkdown("about.md")
