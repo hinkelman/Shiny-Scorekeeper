@@ -735,14 +735,19 @@ function(input, output, session) {
       mutate(PTS = FTM + FGM * 2 + FGM3 * 3,
              FGM23 = FGM + FGM3,
              FGA23 = FGA + FGA3) %>% 
-      # GP = abs(DNP - 1)) %>% # can't remember why this works...
       group_by_at(input$stats_group_by) %>% 
       summarise_all(sum, na.rm = TRUE) %>% 
       left_join(gms, by = input$stats_group_by) %>% 
       mutate(GP = Games - DNP)
     if (input$stats_type == "Per game"){
-      d <- mutate_at(d, vars(-all_of(input$stats_group_by)), 
-                     list(~round(. / ifelse("PlayerID" %in% input$stats_group_by, GP, Games), 2)))
+      # not pretty but works correctly
+      if("PlayerID" %in% input$stats_group_by){
+        d <- mutate_at(d, vars(-all_of(input$stats_group_by)), 
+                       list(~round(. / GP, 2)))
+      }else{
+        d <- mutate_at(d, vars(-all_of(input$stats_group_by)), 
+                       list(~round(. / Games, 2)))
+      }
     } 
     return(d)
   })
