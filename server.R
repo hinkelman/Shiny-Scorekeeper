@@ -726,11 +726,13 @@ function(input, output, session) {
     req(input$teamsTableStatsViewer_rows_selected, input$gamesTable_rows_selected)
     ti <- gamesDisplay()$TeamID[input$gamesTable_rows_selected]
     gi <- gamesDisplay()$GameID[input$gamesTable_rows_selected]
+    gs_sub <- rv[["game_stats"]] %>% 
+      filter(TeamID %in% ti & GameID %in% gi & PlayerID %in% input$selected_players_stats)
     
-    gms <- rv[["game_stats"]] %>% 
+    gms <- gs_sub %>% 
       group_by_at(input$stats_group_by) %>% 
       summarise(Games = length(unique(GameID)))
-    d <- rv[["game_stats"]] %>% 
+    d <- gs_sub %>% 
       filter(TeamID %in% ti & GameID %in% gi & PlayerID %in% input$selected_players_stats) %>% 
       mutate(PTS = FTM + FGM * 2 + FGM3 * 3,
              FGM23 = FGM + FGM3,
