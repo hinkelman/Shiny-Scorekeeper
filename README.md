@@ -22,7 +22,3 @@ shiny::runApp()
 Instructions for how to use the app are found [here.](https://github.com/hinkelman/Shiny-Scorekeeper/blob/master/about.md)
 
 
-
-
-
-
