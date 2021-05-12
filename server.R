@@ -14,21 +14,21 @@ function(input, output, session) {
   # Load data ---------------------------------------------------------
   
   # hinkdata is my personal dataset; not included on github
-  data_fldr <- ifelse(dir.exists("hinkdata"), "hinkdata/", "data/")
+  data_fldr <- ifelse(dir.exists("hinkdata"), "hinkdata", "data")
   
   # using read.csv instead of read_csv b/c there was an issue with DT (maybe related to hiding columns; or issue was with other package? can't remember)
   # track IDs separately to avoid duplicating IDs
-  teamIDs <- read.csv(paste0(data_fldr, "TeamIDs.csv"), stringsAsFactors = FALSE) 
-  teams <- read.csv(paste0(data_fldr, "Teams.csv"), stringsAsFactors = FALSE)
+  teamIDs <- read.csv(file.path(data_fldr, "TeamIDs.csv"), stringsAsFactors = FALSE) 
+  teams <- read.csv(file.path(data_fldr, "Teams.csv"), stringsAsFactors = FALSE)
   # track IDs separately to avoid duplicating IDs
-  playerIDs <- read.csv(paste0(data_fldr, "PlayerIDs.csv"), stringsAsFactors = FALSE)
-  players <- read.csv(paste0(data_fldr, "Players.csv"), stringsAsFactors = FALSE, colClasses =  c("integer", "character", "character")) # specifying class important b/c an empty column will be read as logical; caused problems with paste
+  playerIDs <- read.csv(file.path(data_fldr, "PlayerIDs.csv"), stringsAsFactors = FALSE)
+  players <- read.csv(file.path(data_fldr, "Players.csv"), stringsAsFactors = FALSE, colClasses =  c("integer", "character", "character")) # specifying class important b/c an empty column will be read as logical; caused problems with paste
   # rosters are the players on each team (players can be on more than one team)
-  rosters <- read.csv(paste0(data_fldr, "Rosters.csv"), stringsAsFactors = FALSE)
+  rosters <- read.csv(file.path(data_fldr, "Rosters.csv"), stringsAsFactors = FALSE)
   # track IDs separately to avoid duplicating IDs
-  gameIDs <- read.csv(paste0(data_fldr, "GameIDs.csv"), stringsAsFactors = FALSE) 
-  games <- read.csv(paste0(data_fldr, "Games.csv"), stringsAsFactors = FALSE)
-  game_stats <- read.csv(paste0(data_fldr, "GameStats.csv"), stringsAsFactors = FALSE) 
+  gameIDs <- read.csv(file.path(data_fldr, "GameIDs.csv"), stringsAsFactors = FALSE) 
+  games <- read.csv(file.path(data_fldr, "Games.csv"), stringsAsFactors = FALSE)
+  game_stats <- read.csv(file.path(data_fldr, "GameStats.csv"), stringsAsFactors = FALSE) 
   
   # Reactive values ---------------------------------------------------------
   
@@ -91,12 +91,12 @@ function(input, output, session) {
     # update master list of team IDs
     tid <- nrow(teamIDs) + 1L # ID and row number are the same
     teamIDs[tid,] <<- tid
-    write.csv(teamIDs, paste0(data_fldr, "TeamIDs.csv"), row.names = FALSE)
+    write.csv(teamIDs, file.path(data_fldr, "TeamIDs.csv"), row.names = FALSE)
     
     # update master list of player IDs
     pid <- nrow(playerIDs) + 1L # ID and row number are the same
     playerIDs[pid,] <<- pid
-    write.csv(playerIDs, paste0(data_fldr, "PlayerIDs.csv"), row.names = FALSE)
+    write.csv(playerIDs, file.path(data_fldr, "PlayerIDs.csv"), row.names = FALSE)
     
     # update all of the relevant tables
     ti <- nrow(rv[["teams"]]) + 1L
@@ -184,7 +184,7 @@ function(input, output, session) {
     # update master list of player IDs
     pid <- nrow(playerIDs) + 1L # ID and row number are the same
     playerIDs[pid,] <<- pid
-    write.csv(playerIDs, paste0(data_fldr, "PlayerIDs.csv"), row.names = FALSE)
+    write.csv(playerIDs, file.path(data_fldr, "PlayerIDs.csv"), row.names = FALSE)
     
     tid <- rv[["roster"]]$TeamID[1] # all rows in rv[["roster"]] have same TeamID
     ri <- nrow(rv[["rosters"]]) + 1L
@@ -269,9 +269,9 @@ function(input, output, session) {
   
   observeEvent(input$save_teams_roster_changes,{
     # write teams, rosters, & players from memory to disk
-    write.csv(rv[["teams"]], paste0(data_fldr, "Teams.csv"), row.names = FALSE)
-    write.csv(rv[["rosters"]], paste0(data_fldr, "Rosters.csv"), row.names = FALSE)
-    write.csv(rv[["players"]], paste0(data_fldr, "Players.csv"), row.names = FALSE)
+    write.csv(rv[["teams"]], file.path(data_fldr, "Teams.csv"), row.names = FALSE)
+    write.csv(rv[["rosters"]], file.path(data_fldr, "Rosters.csv"), row.names = FALSE)
+    write.csv(rv[["players"]], file.path(data_fldr, "Players.csv"), row.names = FALSE)
     # update non-reactive versions to keep track of changes
     teams <<- rv[["teams"]]
     rosters <<- rv[["rosters"]]
@@ -311,7 +311,7 @@ function(input, output, session) {
     gid <- nrow(gameIDs) + 1L # ID and row number are the same
     gameIDs[gid,] <<- gid
     rv[["game_id"]] <- gid
-    write.csv(gameIDs, paste0(data_fldr, "GameIDs.csv"), row.names = FALSE)
+    write.csv(gameIDs, file.path(data_fldr, "GameIDs.csv"), row.names = FALSE)
     
     # setting roster initializes a new game
     rv[["game_stats_raw"]] <- rv[["roster"]] %>% 
@@ -357,7 +357,7 @@ function(input, output, session) {
     tid <- rv[["roster"]]$TeamID[1] # same TeamID for all rows in roster
     gi <- nrow(rv[["games"]]) + 1L
     rv[["games"]][gi,] <- gameInfo()
-    write.csv(rv[["games"]], paste0(data_fldr, "Games.csv"), row.names = FALSE) # overwrites previous file
+    write.csv(rv[["games"]], file.path(data_fldr, "Games.csv"), row.names = FALSE) # overwrites previous file
   })
   
   
@@ -407,7 +407,7 @@ function(input, output, session) {
   observeEvent(input$save_game_stats,{
     rv[["game_stats"]] <- filter(rv[["game_stats"]], GameID != rv[["game_id"]])  # drop old game stats
     rv[["game_stats"]] <- bind_rows(rv[["game_stats"]], gameStatsCalcSelected()) # add new game stats
-    write.csv(rv[["game_stats"]], paste0(data_fldr, "GameStats.csv"), row.names = FALSE)
+    write.csv(rv[["game_stats"]], file.path(data_fldr, "GameStats.csv"), row.names = FALSE)
   })
   
   # * update stats ---------------------------------------------------------
