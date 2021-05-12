@@ -371,14 +371,8 @@ function(input, output, session) {
     return(nn)
   })
   
-  output$onCourt <- renderUI({
-    checkboxGroupButtons(inputId = "on_court", size = "normal", justified = TRUE,
-                         direction = "vertical", choices = numName())
-  })
-  
   output$selectedPlayer <- renderUI({
-    req(input$on_court)
-    radioGroupButtons(inputId = "selected_player", choices = input$on_court, size = "normal", 
+    radioGroupButtons(inputId = "selected_player", choices = numName(), size = "normal", 
                       justified = TRUE, direction = "vertical")
   })
   
@@ -396,7 +390,6 @@ function(input, output, session) {
   # * save game stats ---------------------------------------------------------
   
   observe({
-    toggle("roster_msg", condition = !is.null(rv[["game_stats_raw"]]) & (is.null(input$on_court) | length(input$on_court) == 0))  
     toggle("undo", condition = !is.null(rv[["game_stats_raw"]]))
   })
   

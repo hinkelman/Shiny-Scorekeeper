@@ -65,7 +65,9 @@ dashboardPage(
       # Scorekeeper -----------------------------------------------------------------
       tabItem(tabName = "scorekeeper",
               fluidRow(
-                column(width = 3, uiOutput("onCourt")),
+                column(width = 3, 
+                       uiOutput("selectedPlayer"),
+                       uiOutput("DNP")),
                 column(width = 6,
                        box(
                          width = 12,
@@ -110,10 +112,6 @@ dashboardPage(
                        )
                 ),
                 column(width = 3, 
-                       uiOutput("selectedPlayer"),
-                       hidden(h4(id = "roster_msg", "Select players on court from roster on left")),
-                       uiOutput("DNP"),
-                       # uiOutput("DNP_CD"),
                        br(),
                        hidden(actionButton("save_game_stats", "Save game stats", icon = icon("save"), width = "100%")),
                        br(),
