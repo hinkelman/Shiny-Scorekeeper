@@ -3,14 +3,6 @@ function(input, output, session) {
   
   # Source functions ---------------------------------------------------------
   
-  # Example input ---------------------------------------------------------
-  
-  ex_seasons <- c("Winter 2018", "Spring 2018", "Summer 2018", "Fall 2018", "Winter 2019", "2017-2018", "2018-2019")
-  ex_leagues <- c("Youth", "Adult")
-  ex_coaches <- c("Smith", "Johnson", "Williams", "Davis", "Kerr")
-  ex_names <- c("Owen", "Travis", "Jared", "Lucas", "Marc", "Edward", "Joel", "Harold")
-  ex_nums <- seq(5L, 55L, 5L)
-  
   # Load data ---------------------------------------------------------
   
   # hinkdata is my personal dataset; not included on github
@@ -99,11 +91,11 @@ function(input, output, session) {
     
     # update all of the relevant tables
     ti <- nrow(rv[["teams"]]) + 1L
-    rv[["teams"]][ti,] <- list(tid, sample(ex_seasons, 1), sample(ex_leagues, 1), sample(ex_coaches, 1))
+    rv[["teams"]][ti,] <- list(tid, NA, NA, NA)
     ri <- nrow(rv[["rosters"]]) + 1L
-    rv[["rosters"]][ri,] <- list(tid, pid, sample(ex_nums, 1))
+    rv[["rosters"]][ri,] <- list(tid, pid, NA)
     pi <- nrow(rv[["players"]]) + 1L
-    rv[["players"]][pi,] <- list(pid, sample(ex_names, 1), "")
+    rv[["players"]][pi,] <- list(pid, NA, NA)
     replaceData(proxyTeams, rv[["teams"]], resetPaging = FALSE, rownames = FALSE)  # important
   })
   
@@ -187,9 +179,9 @@ function(input, output, session) {
     
     tid <- rv[["roster"]]$TeamID[1] # all rows in rv[["roster"]] have same TeamID
     ri <- nrow(rv[["rosters"]]) + 1L
-    rv[["rosters"]][ri,] <- list(tid, pid, sample(ex_nums, 1))
+    rv[["rosters"]][ri,] <- list(tid, pid, NA)
     pi <- nrow(rv[["players"]]) + 1L
-    rv[["players"]][pi,] <- list(pid, sample(ex_names, 1), "")
+    rv[["players"]][pi,] <- list(pid, NA, NA)
     
     rv[["roster"]] <- rv[["rosters"]] %>% # rebuild rv$roster; another heavy handed approach
       filter(TeamID == tid) %>% 
@@ -247,7 +239,7 @@ function(input, output, session) {
     rv[["rosters"]] <- bind_rows(rv[["rosters"]],
                                 data.frame(TeamID = tid, 
                                            PlayerID = as.integer(input$selected_players), 
-                                           Number = sample(ex_nums, length(input$selected_players)),
+                                           Number = NA,
                                            stringsAsFactors = FALSE))
     
     rv[["roster"]] <- rv[["rosters"]] %>% # rebuild rv$roster; another heavy handed approach

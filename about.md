@@ -8,8 +8,6 @@ Although the app contains no custom JavaScript, I couldn't help myself and used 
 #### Missing Features
 The following is a list of missing features that I decided not to pursue. Some items on this list are easy to implement but were a low priority. Others were abandoned after concluding that implementation would be tricky or even impossible without including custom JavaScript code.
 
-* Adding an empty row that is editable. Currently, adding new rows includes placeholder values.
-* Displaying a column that is not editable. For example, the PlayerID column is hidden to keep users from trying to edit it. However, showing the PlayerID might make it more obvious how players are linked to different teams.
 * Adding mechanisms to import and export data. If Shiny Scorekeeper was packaged as a [standalone desktop application](https://www.travishinkelman.com/post/dsm2-viz-tool/), then the option to import and export data becomes more important than if using Shiny Scorekeeper through R directly because the data folder is easily accessible. Similarly, a standalone desktop app should also provide the option to edit game data from within the app.
 * Tracking minutes played for calculating stats on a per minute basis.
 * Presenting confirmation message when trying to close app with unsaved changes.
