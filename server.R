@@ -47,10 +47,9 @@ function(input, output, session) {
   # * table ---------------------------------------------------------
   
   output$teamsTable <- renderDT(
-    rv[["teams"]], selection = "single", editable = TRUE, 
-    style = "bootstrap", rownames = FALSE,
-    options = list(searching = FALSE, bPaginate = FALSE, info = FALSE,
-                   columnDefs = list(list(visible = FALSE, targets = 0)))) # hide TeamID column
+    rv[["teams"]], selection = "single", style = "bootstrap", rownames = FALSE,
+    editable = list(target = 'row', disable = list(columns = c(0))),            # disable TeamID
+    options = list(searching = FALSE, bPaginate = FALSE, info = FALSE))
   
   proxyTeams <- dataTableProxy("teamsTable")
   
@@ -113,10 +112,10 @@ function(input, output, session) {
   # * table ---------------------------------------------------------
   
   output$rosterTable <- renderDT(
-    rv[["roster"]], selection = "single", editable = TRUE, 
-    style = "bootstrap", rownames = FALSE,
+    rv[["roster"]], selection = "single", style = "bootstrap", rownames = FALSE,
+    editable = list(target = 'row', disable = list(columns = c(0, 1))),         # disable PlayerID column
     options = list(searching = FALSE, bPaginate = FALSE, info = FALSE,
-                   columnDefs = list(list(visible = FALSE, targets = c(0,1))))) # hide TeamID and PlayerID columns
+                   columnDefs = list(list(visible = FALSE, targets = c(0)))))   # hide TeamID column
   
   proxyRoster <- dataTableProxy("rosterTable")
   
@@ -261,10 +260,10 @@ function(input, output, session) {
   
   observe({
     input$save_teams_roster_changes # take dependency on save button to hide button after saving
-    cond <- (isTRUE(all_equal(players, rv[["players"]])) | isTRUE(all_equal(rosters, rv[["rosters"]])) | isTRUE(all_equal(teams, rv[["teams"]])))
+    cond <- (isTRUE(all.equal(players, rv[["players"]])) | isTRUE(all.equal(rosters, rv[["rosters"]])) | isTRUE(all.equal(teams, rv[["teams"]])))
     toggle("set_roster", condition = cond & !is.null(input$teamsTable_rows_selected))
     # toggle("exportRosters", condition = cond)
-    toggle("save_teams_roster_changes", condition = !isTRUE(all_equal(players, rv[["players"]])) | !isTRUE(all_equal(rosters, rv[["rosters"]])) | !isTRUE(all_equal(teams, rv[["teams"]])))
+    toggle("save_teams_roster_changes", condition = !isTRUE(all.equal(players, rv[["players"]])) | !isTRUE(all.equal(rosters, rv[["rosters"]])) | !isTRUE(all.equal(teams, rv[["teams"]])))
   })
   
   observeEvent(input$save_teams_roster_changes,{
@@ -348,7 +347,7 @@ function(input, output, session) {
   observe({
     req(rv[["game_id"]])
     input$save_game_info # take dependency on save button
-    toggle("save_game_info", condition = !isTRUE(all_equal(filter(rv[["games"]], GameID == rv[["game_id"]]),
+    toggle("save_game_info", condition = !isTRUE(all.equal(filter(rv[["games"]], GameID == rv[["game_id"]]),
                                                            gameInfo())))
   })
   
@@ -401,7 +400,7 @@ function(input, output, session) {
   
   observe({
     req(rv[["game_stats_calc"]])
-    toggle("save_game_stats", condition = !isTRUE(all_equal(gameStatsCalcSelected(), filter(rv[["game_stats"]], GameID == rv[["game_id"]]))))
+    toggle("save_game_stats", condition = !isTRUE(all.equal(gameStatsCalcSelected(), filter(rv[["game_stats"]], GameID == rv[["game_id"]]))))
   })
   
   observeEvent(input$save_game_stats,{
