@@ -214,10 +214,10 @@ function(input, output, session) {
     ids <- all_ids[!(all_ids %in% sel_ids)] # find PlayerIDs that haven't been added to roster
     
     req(length(ids) > 0) # at least one player that could be selected
-    
+
     d <- rv[["players"]] %>% 
       filter(PlayerID %in% ids) %>%
-      mutate(PlayerName = paste(FirstName, LastName)) %>% 
+      mutate(PlayerName = ifelse(LastName == "", FirstName, paste(FirstName, LastName))) %>% 
       arrange(FirstName)
     
     picker.ids <- d[["PlayerID"]]
@@ -697,7 +697,7 @@ function(input, output, session) {
     d <- playersDisplay() %>% 
       select(PlayerID, FirstName, LastName) %>% 
       unique() %>%   # same player could be on more than one team
-      mutate(PlayerName = paste(FirstName, LastName)) %>% 
+      mutate(PlayerName = ifelse(LastName == "", FirstName, paste(FirstName, LastName))) %>% 
       arrange(FirstName)
     
     picker.ids <- d[["PlayerID"]]
