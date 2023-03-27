@@ -7,7 +7,7 @@ Shiny Scorekeeper is a basketball scorekeeper app built with the Shiny web frame
 ### Installation
 
 1. Install [R](https://www.r-project.org)
-2. Install [RStudio Desktop](https://www.rstudio.com/products/rstudio/download/)
+2. Install [RStudio Desktop](https://posit.co/download/rstudio-desktop/)
 3. Clone or download this repository
 4. Open Shiny-Scorekeeper.Rproj
 5. Run the following code to install required packages (only needs to be done once)
