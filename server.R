@@ -783,8 +783,7 @@ function(input, output, session) {
              `TS%` = round(PTS/(0.88 * FTA + 2 * (FGA + FGA3))*100))
     if ("TeamID" %in% grps){
       d <- d %>% 
-        left_join(rv[["teams"]]) %>% 
-        mutate(Team = paste0(Season, " (", Coach, ")"))
+        left_join(rv[["teams"]])
     }
     if ("GameID" %in% grps){
       d <- d %>% 
