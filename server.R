@@ -32,20 +32,21 @@ function(input, output, session) {
   rv <- reactiveValues(teams = arrange(teams, desc(Season)), players = players, 
                        rosters = rosters, roster = NULL, 
                        game_id = NULL, games = arrange(games, desc(Date)),
-                       game_stats = game_stats, game_stats_raw = NULL, game_stats_calc = NULL)
+                       game_stats = game_stats, game_stats_raw = NULL, game_stats_calc = NULL,
+                       game_text = NULL)
   
   # Teams ---------------------------------------------------------
   
-  # * table ---------------------------------------------------------
+  ## table ---------------------------------------------------------
   
   output$teamsTable <- renderDT(
     rv[["teams"]], selection = "single", style = "bootstrap", rownames = FALSE,
-    editable = list(target = "cell", disable = list(columns = c(0))),            # disable TeamID
+    editable = list(target = "cell", disable = list(columns = c(0))),              # disable TeamID
     options = list(searching = FALSE, bPaginate = FALSE, info = FALSE))
   
   proxyTeams <- dataTableProxy("teamsTable")
   
-  # * edit cell ---------------------------------------------------------
+  ## edit cell ---------------------------------------------------------
   
   observeEvent(input$teamsTable_cell_edit, {
     info <- input$teamsTable_cell_edit
@@ -56,7 +57,7 @@ function(input, output, session) {
     replaceData(proxyTeams, rv[["teams"]], resetPaging = FALSE, rownames = FALSE)  # important
   })
   
-  # * delete row ---------------------------------------------------------
+  ## delete row ---------------------------------------------------------
   
   observe({
     toggle("delete_teams_row", condition = nrow(rv[["teams"]]) > 0 & !is.null(input$teamsTable_rows_selected))
@@ -73,7 +74,7 @@ function(input, output, session) {
     replaceData(proxyTeams, rv[["teams"]], resetPaging = FALSE, rownames = FALSE)  # important
   })
   
-  # * add row ---------------------------------------------------------
+  ## add row ---------------------------------------------------------
   
   observeEvent(input$add_teams_row,{
     #addRow() only works when server = FALSE
@@ -101,11 +102,11 @@ function(input, output, session) {
   
   # Roster ---------------------------------------------------------
   
-  # * table ---------------------------------------------------------
+  ## table ---------------------------------------------------------
   
   output$rosterTable <- renderDT(
     rv[["roster"]], selection = "single", style = "bootstrap", rownames = FALSE,
-    editable = list(target = "cell", disable = list(columns = c(0, 1))),         # disable PlayerID column
+    editable = list(target = "cell", disable = list(columns = c(0, 1))),        # disable PlayerID column
     options = list(searching = FALSE, bPaginate = FALSE, info = FALSE,
                    columnDefs = list(list(visible = FALSE, targets = c(0)))))   # hide TeamID column
   
@@ -124,7 +125,7 @@ function(input, output, session) {
     replaceData(proxyRoster, rv[["roster"]], resetPaging = FALSE, rownames = FALSE)  # important
   })
   
-  # * dynamic UI ---------------------------------------------------------
+  ## dynamic UI ---------------------------------------------------------
   
   observe({
     req(rv[["roster"]])
@@ -133,7 +134,7 @@ function(input, output, session) {
     toggle("delete_roster_row", condition = nrow(rv[["roster"]]) > 0 & !is.null(input$rosterTable_rows_selected))
   })
   
-  # * edit cell ---------------------------------------------------------
+  ## edit cell ---------------------------------------------------------
   
   observeEvent(input$rosterTable_cell_edit, {
     info <- input$rosterTable_cell_edit
@@ -166,7 +167,7 @@ function(input, output, session) {
     replaceData(proxyRoster, rv[["roster"]], resetPaging = FALSE, rownames = FALSE)  # important
   })
   
-  # * add row ---------------------------------------------------------
+  ## add row ---------------------------------------------------------
   
   observeEvent(input$add_roster_row,{
     #addRow() only works when server = FALSE
@@ -189,7 +190,7 @@ function(input, output, session) {
     replaceData(proxyRoster, rv[["roster"]], resetPaging = FALSE, rownames = FALSE)  # important
   })
   
-  # * delete row ---------------------------------------------------------
+  ## delete row ---------------------------------------------------------
   
   observeEvent(input$delete_roster_row,{
     req(input$rosterTable_rows_selected)
@@ -204,7 +205,7 @@ function(input, output, session) {
     replaceData(proxyRoster, rv[["roster"]], resetPaging = FALSE, rownames = FALSE)  # important
   })
   
-  # * select from previous entered players ---------------------------------------------------------
+  ## select from previous entered players ---------------------------------------------------------
   
   output$previousPlayers <- renderUI({
     req(rv[["roster"]], rv[["players"]])
@@ -248,7 +249,7 @@ function(input, output, session) {
     replaceData(proxyRoster, rv[["roster"]], resetPaging = FALSE, rownames = FALSE)  # important
   })
   
-  # * show/hide save button ---------------------------------------------------------
+  ## show/hide save button ---------------------------------------------------------
   
   observe({
     input$save_teams_roster_changes # take dependency on save button to hide button after saving
@@ -269,7 +270,7 @@ function(input, output, session) {
     players <<- rv[["players"]]
   })
   
-  # * export rosters ---------------------------------------------------------
+  ## export rosters ---------------------------------------------------------
   
   # rosterFile <- reactive({
   #   left_join(rv[["teams"]], rv[["rosters"]], by = "TeamID")
@@ -284,7 +285,7 @@ function(input, output, session) {
   
   # Scorekeeper ---------------------------------------------------------
   
-  # * set roster ---------------------------------------------------------
+  ## set roster ---------------------------------------------------------
   
   observeEvent(input$tabs, {
     if (input$tabs == "scorekeeper" & input$set_roster == 0){
@@ -324,7 +325,7 @@ function(input, output, session) {
     updateTabItems(session, "tabs", "scorekeeper") # move to scorekeeper tab after setting roster
   })
   
-  # * game info ---------------------------------------------------------
+  ## game info ---------------------------------------------------------
   
   gameInfo <- reactive({
     data.frame(GameID = rv[["game_id"]], 
@@ -352,7 +353,7 @@ function(input, output, session) {
   })
   
   
-  # * player info ---------------------------------------------------------
+  ## player info ---------------------------------------------------------
   
   numName <- reactive({
     req(rv[["roster"]], input$set_roster > 0)
@@ -372,7 +373,7 @@ function(input, output, session) {
     pickerInput(inputId = "dnp", label = "Did Not Play (DNP)", choices = numName(), multiple = TRUE)
   })
   
-  # * save game stats ---------------------------------------------------------
+  ## save game stats ---------------------------------------------------------
   
   observe({
     toggle("undo", condition = !is.null(rv[["game_stats_raw"]]))
@@ -395,7 +396,7 @@ function(input, output, session) {
     write.csv(rv[["game_stats"]], file.path(data_fldr, "GameStats.csv"), row.names = FALSE)
   })
   
-  # * update stats ---------------------------------------------------------
+  ## update stats ---------------------------------------------------------
   
   # values are incremented or decremented based on whether undo is switched on
   change <- reactive({
@@ -416,7 +417,7 @@ function(input, output, session) {
   #   return(data)
   # }
   
-  # ** free throws ---------------------------------------------------------
+  ### free throws ---------------------------------------------------------
   
   observeEvent(input$miss_1,{
     ri <- rowIndex()
@@ -433,7 +434,7 @@ function(input, output, session) {
     }
   })
   
-  # ** field goals ---------------------------------------------------------
+  ### field goals ---------------------------------------------------------
   
   observeEvent(input$miss_2,{
     ri <- rowIndex()
@@ -450,7 +451,7 @@ function(input, output, session) {
     }
   })
   
-  # ** three pointers ---------------------------------------------------------
+  ### three pointers ---------------------------------------------------------
   
   observeEvent(input$miss_3,{
     ri <- rowIndex()
@@ -467,7 +468,7 @@ function(input, output, session) {
     }
   })
   
-  # ** steals and turnovers ---------------------------------------------------------
+  ### steals and turnovers ---------------------------------------------------------
   
   observeEvent(input$stl,{
     ri <- rowIndex()
@@ -481,7 +482,7 @@ function(input, output, session) {
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
   })
   
-  # ** rebounds ---------------------------------------------------------
+  ### rebounds ---------------------------------------------------------
   
   observeEvent(input$dreb,{
     ri <- rowIndex()
@@ -495,7 +496,7 @@ function(input, output, session) {
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
   })
   
-  # ** blocks and assists ---------------------------------------------------------
+  ### blocks and assists ---------------------------------------------------------
   
   observeEvent(input$blk,{
     ri <- rowIndex()
@@ -509,7 +510,7 @@ function(input, output, session) {
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
   })
   
-  # ** fouls ---------------------------------------------------------
+  ### fouls ---------------------------------------------------------
   
   observeEvent(input$pf,{
     ri <- rowIndex()
@@ -517,7 +518,7 @@ function(input, output, session) {
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
   })
   
-  # * calculate stats ---------------------------------------------------------
+  ## calculate stats ---------------------------------------------------------
   
   # watch for changes to rv[["game_stats_raw"]] (and input$dnp) to update calculated columns
   observe({
@@ -538,7 +539,7 @@ function(input, output, session) {
     }
   })
   
-  # * display stats ---------------------------------------------------------
+  ## display stats ---------------------------------------------------------
   
   rowIndexGSC <- reactive({
     which(rv[["game_stats_calc"]][["NumName"]] == input$selected_player)
