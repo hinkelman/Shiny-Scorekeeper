@@ -8,15 +8,20 @@ library(tidyr)
 
 stats_group_by_opts <- c("Team" = "TeamID", "Game" = "GameID", "Player" = "PlayerID")
 
-first_num <- function(name, num){
-  ifelse(num == "" | is.na(num), name,
-         ifelse(name == "" | is.na(name),
+num_first <- function(num, first){
+  ifelse(num == "" | is.na(num), first,
+         ifelse(first == "" | is.na(first),
                 paste0("#", num),
-                paste0("#", num, " - ", name)))
+                paste0("#", num, " - ", first)))
 }
 
 first_last <- function(first, last){
   ifelse(last == "", first, paste(first, last))
+}
+
+log_action <- function(undo_bool, game_log_text, player){
+  undo = ifelse(undo_bool, "UNDO ", "")
+  paste0(undo, game_log_text, player)
 }
 
 display_shooting <- function(data, ri, stat, ma = NULL){

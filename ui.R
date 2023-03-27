@@ -117,7 +117,11 @@ dashboardPage(
                        br(),
                        br(),
                        br(),
-                       hidden(switchInput("undo", label = "UNDO", size = "large"))
+                       hidden(switchInput("undo", label = "UNDO", size = "large")),
+                       br(),
+                       br(),
+                       h4(textOutput("gameLogLastTitle")),
+                       h5(textOutput("gameLogLastText"))
                 )
               ),
               fluidRow(

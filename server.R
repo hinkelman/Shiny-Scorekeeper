@@ -33,7 +33,7 @@ function(input, output, session) {
                        rosters = rosters, roster = NULL, 
                        game_id = NULL, games = arrange(games, desc(Date)),
                        game_stats = game_stats, game_stats_raw = NULL, game_stats_calc = NULL,
-                       game_text = NULL)
+                       game_log_text = NULL)
   
   # Teams ---------------------------------------------------------
   
@@ -308,7 +308,7 @@ function(input, output, session) {
     # setting roster initializes a new game
     rv[["game_stats_raw"]] <- rv[["roster"]] %>% 
       mutate(GameID = gid,
-             NumName = first_num(FirstName, Number),
+             NumFirst = num_first(Number, FirstName),
              FTM = 0L,
              FTA = 0L,
              FGM = 0L,
@@ -355,22 +355,22 @@ function(input, output, session) {
   
   ## player info ---------------------------------------------------------
   
-  numName <- reactive({
+  numFirst <- reactive({
     req(rv[["roster"]], input$set_roster > 0)
     d <- rv[["roster"]] %>% 
-      mutate(NumName = first_num(FirstName, Number))
-    nn <- unique(d$NumName)
+      mutate(NumFirst = num_first(Number, FirstName))
+    nn <- unique(d$NumFirst)
     return(nn)
   })
   
   output$selectedPlayer <- renderUI({
-    radioGroupButtons(inputId = "selected_player", choices = numName(), size = "normal", 
+    radioGroupButtons(inputId = "selected_player", choices = numFirst(), size = "normal", 
                       justified = TRUE, direction = "vertical")
   })
   
   output$DNP <- renderUI({
     # did not play
-    pickerInput(inputId = "dnp", label = "Did Not Play (DNP)", choices = numName(), multiple = TRUE)
+    pickerInput(inputId = "dnp", label = "Did Not Play (DNP)", choices = numFirst(), multiple = TRUE)
   })
   
   ## save game stats ---------------------------------------------------------
@@ -382,7 +382,7 @@ function(input, output, session) {
   gameStatsCalcSelected <- reactive({
     # this was how I initially solved this problem (i.e., after deciding not to save calculated columns)
     # wouldn't have to drop as many columns from rv[["game_stats_raw"]] but that dataframe doesn't include DNP column
-    select(rv[["game_stats_calc"]], -FirstName, -LastName, -Number, -NumName, -`FT%`, -`FG%`, -`3PT%`, -`TS%`, -EFF)  # drop columns contained in other tables (e.g., names and numbers) and non-counting stats, i.e., stats that can't be summarized with sum
+    select(rv[["game_stats_calc"]], -FirstName, -LastName, -Number, -NumFirst, -`FT%`, -`FG%`, -`3PT%`, -`TS%`, -EFF)  # drop columns contained in other tables (e.g., names and numbers) and non-counting stats, i.e., stats that can't be summarized with sum
   })
   
   observe({
@@ -404,7 +404,18 @@ function(input, output, session) {
   })
   
   rowIndex <- reactive({
-    which(rv[["game_stats_raw"]]$NumName == input$selected_player)
+    which(rv[["game_stats_raw"]]$NumFirst == input$selected_player)
+  })
+  
+  output$gameLogLastTitle <- renderText({
+    out = ""
+    if (!is.null(rv[["game_log_text"]])) out = "Last game log entry:"
+    out
+  })
+  
+  output$gameLogLastText <- renderText({
+    # req(rv[["game_log_text"]])
+    rv[["game_log_text"]]
   })
   
   ## tried this approach but yielded "Error in : promise already under evaluation: recursive default argument reference or earlier problems?"
@@ -420,12 +431,15 @@ function(input, output, session) {
   ### free throws ---------------------------------------------------------
   
   observeEvent(input$miss_1,{
+    # need the redundancy of calling log_action in every observeEvent so that the logged action is not too reactive (e.g., changing with undo or player)
+    rv[["game_log_text"]] <- log_action(input$undo, "Missed free throw by ", input$selected_player)
     ri <- rowIndex()
     ci <- which(names(rv[["game_stats_raw"]]) == "FTA")
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
   })
   
   observeEvent(input$make_1,{ 
+    rv[["game_log_text"]] <- log_action(input$undo, "Made free throw by ", input$selected_player)
     columns <- c("FTM", "FTA")
     ri <- rowIndex()
     for (i in columns){
@@ -437,12 +451,14 @@ function(input, output, session) {
   ### field goals ---------------------------------------------------------
   
   observeEvent(input$miss_2,{
+    rv[["game_log_text"]] <- log_action(input$undo, "Missed field goal by ", input$selected_player)
     ri <- rowIndex()
     ci <- which(names(rv[["game_stats_raw"]]) == "FGA")
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
   })
   
   observeEvent(input$make_2,{ 
+    rv[["game_log_text"]] <- log_action(input$undo, "Made field goal by ", input$selected_player)
     columns <- c("FGM", "FGA")
     ri <- rowIndex()
     for (i in columns){
@@ -454,12 +470,14 @@ function(input, output, session) {
   ### three pointers ---------------------------------------------------------
   
   observeEvent(input$miss_3,{
+    rv[["game_log_text"]] <- log_action(input$undo, "Missed 3-pt field goal by ", input$selected_player)
     ri <- rowIndex()
     ci <- which(names(rv[["game_stats_raw"]]) == "FGA3")
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
   })
   
-  observeEvent(input$make_3,{ 
+  observeEvent(input$make_3,{
+    rv[["game_log_text"]] <- log_action(input$undo, "Made 3-pt field goal by ", input$selected_player)
     columns <- c("FGM3", "FGA3")
     ri <- rowIndex()
     for (i in columns){
@@ -471,12 +489,14 @@ function(input, output, session) {
   ### steals and turnovers ---------------------------------------------------------
   
   observeEvent(input$stl,{
+    rv[["game_log_text"]] <- log_action(input$undo, "Steal by ", input$selected_player)
     ri <- rowIndex()
     ci <- which(names(rv[["game_stats_raw"]]) == "STL")
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
   })
   
   observeEvent(input$tov,{
+    rv[["game_log_text"]] <- log_action(input$undo, "Turnover by ", input$selected_player)
     ri <- rowIndex()
     ci <- which(names(rv[["game_stats_raw"]]) == "TOV")
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
@@ -485,12 +505,14 @@ function(input, output, session) {
   ### rebounds ---------------------------------------------------------
   
   observeEvent(input$dreb,{
+    rv[["game_log_text"]] <- log_action(input$undo, "Defensive rebound by ", input$selected_player)
     ri <- rowIndex()
     ci <- which(names(rv[["game_stats_raw"]]) == "DREB")
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
   })
   
   observeEvent(input$oreb,{
+    rv[["game_log_text"]] <- log_action(input$undo, "Offensive rebound by ", input$selected_player)
     ri <- rowIndex()
     ci <- which(names(rv[["game_stats_raw"]]) == "OREB")
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
@@ -499,12 +521,14 @@ function(input, output, session) {
   ### blocks and assists ---------------------------------------------------------
   
   observeEvent(input$blk,{
+    rv[["game_log_text"]] <- log_action(input$undo, "Block by ", input$selected_player)
     ri <- rowIndex()
     ci <- which(names(rv[["game_stats_raw"]]) == "BLK")
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
   })
   
   observeEvent(input$ast,{
+    rv[["game_log_text"]] <- log_action(input$undo, "Assist by ", input$selected_player)
     ri <- rowIndex()
     ci <- which(names(rv[["game_stats_raw"]]) == "AST")
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
@@ -513,6 +537,7 @@ function(input, output, session) {
   ### fouls ---------------------------------------------------------
   
   observeEvent(input$pf,{
+    rv[["game_log_text"]] <- log_action(input$undo, "Foul by ", input$selected_player)
     ri <- rowIndex()
     ci <- which(names(rv[["game_stats_raw"]]) == "PF")
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
@@ -535,14 +560,14 @@ function(input, output, session) {
       rv[["game_stats_calc"]] <- temp %>% mutate(DNP = 0)
     }else{
       rv[["game_stats_calc"]] <- temp %>% 
-        mutate(DNP = ifelse(NumName %in% input$dnp, 1, 0))
+        mutate(DNP = ifelse(NumFirst %in% input$dnp, 1, 0))
     }
   })
   
   ## display stats ---------------------------------------------------------
   
   rowIndexGSC <- reactive({
-    which(rv[["game_stats_calc"]][["NumName"]] == input$selected_player)
+    which(rv[["game_stats_calc"]][["NumFirst"]] == input$selected_player)
   })
   
   output$pts <- renderValueBox({
