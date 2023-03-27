@@ -215,7 +215,7 @@ function(input, output, session) {
     ids <- all_ids[!(all_ids %in% sel_ids)] # find PlayerIDs that haven't been added to roster
     
     req(length(ids) > 0) # at least one player that could be selected
-
+    
     d <- rv[["players"]] %>% 
       filter(PlayerID %in% ids) %>%
       mutate(PlayerName = first_last(FirstName, LastName)) %>% 
@@ -238,10 +238,10 @@ function(input, output, session) {
     tid <- rv[["roster"]]$TeamID[1] # all rows in rv[["roster"]] have same TeamID
     
     rv[["rosters"]] <- bind_rows(rv[["rosters"]],
-                                data.frame(TeamID = tid, 
-                                           PlayerID = as.integer(input$selected_players), 
-                                           Number = NA_integer_,
-                                           stringsAsFactors = FALSE))
+                                 data.frame(TeamID = tid, 
+                                            PlayerID = as.integer(input$selected_players), 
+                                            Number = NA_integer_,
+                                            stringsAsFactors = FALSE))
     
     rv[["roster"]] <- rv[["rosters"]] %>% # rebuild rv$roster; another heavy handed approach
       filter(TeamID == tid) %>% 
@@ -359,8 +359,7 @@ function(input, output, session) {
     req(rv[["roster"]], input$set_roster > 0)
     d <- rv[["roster"]] %>% 
       mutate(NumFirst = num_first(Number, FirstName))
-    nn <- unique(d$NumFirst)
-    return(nn)
+    unique(d$NumFirst)
   })
   
   output$selectedPlayer <- renderUI({
@@ -663,7 +662,7 @@ function(input, output, session) {
     out <- ""
     if (is.null(input$teamsTableStatsViewer_rows_selected) & is.null(input$gamesTable_rows_selected)) out <- "Select row(s) in Teams and Games tables above to view statistics"
     if (is.null(input$gamesTable_rows_selected)) out <- "Select row(s) in Games table above to view statistics"
-    return(out)
+    out
   })
   
   output$teamsTableStatsViewer <- renderDT(
@@ -755,7 +754,7 @@ function(input, output, session) {
                        list(~round(. / Games, 2)))
       }
     } 
-    return(d)
+    d
   })
   
   statisticsDisplay <- reactive({
@@ -813,7 +812,7 @@ function(input, output, session) {
       d <- select(d, Date, Opponent, Player, GP, PTS, FGM = FGM23, FGA = FGA23, `FG%`, `3PM` = FGM3, `3PA` = FGA3, `3P%`, FTM, FTA, `FT%`, `TS%`, OREB, DREB, REB, AST, TOV, STL, BLK, PF, EFF)
       if (input$stats_type == "Per game") d <- select(d, -GP)
     }
-    return(d)
+    d
   })
   
   output$statisticsTable <- renderDT(
