@@ -372,12 +372,6 @@ function(input, output, session) {
     pickerInput(inputId = "dnp", label = "Did Not Play (DNP)", choices = numName(), multiple = TRUE)
   })
   
-  # output$DNP_CD <- renderUI({
-  #   # did not play - coach's decision
-  #   req(input$dnp)
-  #   pickerInput(inputId = "dnp_cd", label = "DNP-CD", choices = input$dnp, multiple = TRUE)
-  # })
-  
   # * save game stats ---------------------------------------------------------
   
   observe({
