@@ -40,7 +40,7 @@ function(input, output, session) {
   
   output$teamsTable <- renderDT(
     rv[["teams"]], selection = "single", style = "bootstrap", rownames = FALSE,
-    editable = list(target = 'row', disable = list(columns = c(0))),            # disable TeamID
+    editable = list(target = "cell", disable = list(columns = c(0))),            # disable TeamID
     options = list(searching = FALSE, bPaginate = FALSE, info = FALSE))
   
   proxyTeams <- dataTableProxy("teamsTable")
@@ -91,11 +91,11 @@ function(input, output, session) {
     
     # update all of the relevant tables
     ti <- nrow(rv[["teams"]]) + 1L
-    rv[["teams"]][ti,] <- list(tid, NA, NA, NA)
+    rv[["teams"]][ti,] <- list(tid, "", "", "")
     ri <- nrow(rv[["rosters"]]) + 1L
-    rv[["rosters"]][ri,] <- list(tid, pid, NA)
+    rv[["rosters"]][ri,] <- list(tid, pid, NA_integer_)
     pi <- nrow(rv[["players"]]) + 1L
-    rv[["players"]][pi,] <- list(pid, NA, NA)
+    rv[["players"]][pi,] <- list(pid, "", "")
     replaceData(proxyTeams, rv[["teams"]], resetPaging = FALSE, rownames = FALSE)  # important
   })
   
@@ -105,7 +105,7 @@ function(input, output, session) {
   
   output$rosterTable <- renderDT(
     rv[["roster"]], selection = "single", style = "bootstrap", rownames = FALSE,
-    editable = list(target = 'row', disable = list(columns = c(0, 1))),         # disable PlayerID column
+    editable = list(target = "cell", disable = list(columns = c(0, 1))),         # disable PlayerID column
     options = list(searching = FALSE, bPaginate = FALSE, info = FALSE,
                    columnDefs = list(list(visible = FALSE, targets = c(0)))))   # hide TeamID column
   
@@ -179,9 +179,9 @@ function(input, output, session) {
     
     tid <- rv[["roster"]]$TeamID[1] # all rows in rv[["roster"]] have same TeamID
     ri <- nrow(rv[["rosters"]]) + 1L
-    rv[["rosters"]][ri,] <- list(tid, pid, NA)
+    rv[["rosters"]][ri,] <- list(tid, pid, NA_integer_)
     pi <- nrow(rv[["players"]]) + 1L
-    rv[["players"]][pi,] <- list(pid, NA, NA)
+    rv[["players"]][pi,] <- list(pid, "", "")
     
     rv[["roster"]] <- rv[["rosters"]] %>% # rebuild rv$roster; another heavy handed approach
       filter(TeamID == tid) %>% 
@@ -239,7 +239,7 @@ function(input, output, session) {
     rv[["rosters"]] <- bind_rows(rv[["rosters"]],
                                 data.frame(TeamID = tid, 
                                            PlayerID = as.integer(input$selected_players), 
-                                           Number = NA,
+                                           Number = NA_integer_,
                                            stringsAsFactors = FALSE))
     
     rv[["roster"]] <- rv[["rosters"]] %>% # rebuild rv$roster; another heavy handed approach
