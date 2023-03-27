@@ -33,7 +33,7 @@ function(input, output, session) {
                        rosters = rosters, roster = NULL, 
                        game_id = NULL, games = arrange(games, desc(Date)),
                        game_stats = game_stats, game_stats_raw = NULL, game_stats_calc = NULL,
-                       game_log_text = NULL)
+                       game_log = NULL)
   
   # Teams ---------------------------------------------------------
   
@@ -337,6 +337,12 @@ function(input, output, session) {
                stringsAsFactors = FALSE)
   })
   
+  gameInfoText <- reactive({
+    c(paste0("GameID: ", rv[["game_id"]], "; TeamID: ", rv[["roster"]]$TeamID[1], 
+             "; Date: ", as.character(input$game_date), "; Opponent: ", input$opponent_name),
+      "---------------------------------------------------------------------")
+  })
+  
   observe({
     req(rv[["game_id"]])
     input$save_game_info # take dependency on save button
@@ -350,6 +356,8 @@ function(input, output, session) {
     gi <- nrow(rv[["games"]]) + 1L
     rv[["games"]][gi,] <- gameInfo()
     write.csv(rv[["games"]], file.path(data_fldr, "Games.csv"), row.names = FALSE) # overwrites previous file
+    # if game info changes, then top part of game log also changed (so rewriting whole file)
+    cat(c(gameInfoText(), rv[["game_log"]]), file = file.path("gamelogs", paste0("GameID_", rv[["game_id"]], ".txt")), sep = "\n")
   })
   
   
@@ -393,6 +401,8 @@ function(input, output, session) {
     rv[["game_stats"]] <- filter(rv[["game_stats"]], GameID != rv[["game_id"]])  # drop old game stats
     rv[["game_stats"]] <- bind_rows(rv[["game_stats"]], gameStatsCalcSelected()) # add new game stats
     write.csv(rv[["game_stats"]], file.path(data_fldr, "GameStats.csv"), row.names = FALSE)
+    # if game stats change, then game log also changed (not accounting for situation where game log is changing separately from the stats)
+    cat(c(gameInfoText(), rv[["game_log"]]), file = file.path("gamelogs", paste0("GameID_", rv[["game_id"]], ".txt")), sep = "\n")
   })
   
   ## update stats ---------------------------------------------------------
@@ -408,13 +418,13 @@ function(input, output, session) {
   
   output$gameLogLastTitle <- renderText({
     out = ""
-    if (!is.null(rv[["game_log_text"]])) out = "Last game log entry:"
+    if (!is.null(rv[["game_log"]])) out = "Last game log entry:"
     out
   })
   
   output$gameLogLastText <- renderText({
-    # req(rv[["game_log_text"]])
-    rv[["game_log_text"]]
+    req(rv[["game_log"]])
+    rv[["game_log"]][length(rv[["game_log"]])]
   })
   
   ## tried this approach but yielded "Error in : promise already under evaluation: recursive default argument reference or earlier problems?"
@@ -431,14 +441,14 @@ function(input, output, session) {
   
   observeEvent(input$miss_1,{
     # need the redundancy of calling log_action in every observeEvent so that the logged action is not too reactive (e.g., changing with undo or player)
-    rv[["game_log_text"]] <- log_action(input$undo, "Missed free throw by ", input$selected_player)
+    rv[["game_log"]] <- c(rv[["game_log"]], log_action(input$undo, "Missed free throw by ", input$selected_player))
     ri <- rowIndex()
     ci <- which(names(rv[["game_stats_raw"]]) == "FTA")
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
   })
   
   observeEvent(input$make_1,{ 
-    rv[["game_log_text"]] <- log_action(input$undo, "Made free throw by ", input$selected_player)
+    rv[["game_log"]] <- c(rv[["game_log"]], log_action(input$undo, "Made free throw by ", input$selected_player))
     columns <- c("FTM", "FTA")
     ri <- rowIndex()
     for (i in columns){
@@ -450,14 +460,14 @@ function(input, output, session) {
   ### field goals ---------------------------------------------------------
   
   observeEvent(input$miss_2,{
-    rv[["game_log_text"]] <- log_action(input$undo, "Missed field goal by ", input$selected_player)
+    rv[["game_log"]] <- c(rv[["game_log"]], log_action(input$undo, "Missed field goal by ", input$selected_player))
     ri <- rowIndex()
     ci <- which(names(rv[["game_stats_raw"]]) == "FGA")
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
   })
   
   observeEvent(input$make_2,{ 
-    rv[["game_log_text"]] <- log_action(input$undo, "Made field goal by ", input$selected_player)
+    rv[["game_log"]] <- c(rv[["game_log"]], log_action(input$undo, "Made field goal by ", input$selected_player))
     columns <- c("FGM", "FGA")
     ri <- rowIndex()
     for (i in columns){
@@ -469,14 +479,14 @@ function(input, output, session) {
   ### three pointers ---------------------------------------------------------
   
   observeEvent(input$miss_3,{
-    rv[["game_log_text"]] <- log_action(input$undo, "Missed 3-pt field goal by ", input$selected_player)
+    rv[["game_log"]] <- c(rv[["game_log"]], log_action(input$undo, "Missed 3-pt field goal by ", input$selected_player))
     ri <- rowIndex()
     ci <- which(names(rv[["game_stats_raw"]]) == "FGA3")
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
   })
   
   observeEvent(input$make_3,{
-    rv[["game_log_text"]] <- log_action(input$undo, "Made 3-pt field goal by ", input$selected_player)
+    rv[["game_log"]] <- c(rv[["game_log"]], log_action(input$undo, "Made 3-pt field goal by ", input$selected_player))
     columns <- c("FGM3", "FGA3")
     ri <- rowIndex()
     for (i in columns){
@@ -488,14 +498,14 @@ function(input, output, session) {
   ### steals and turnovers ---------------------------------------------------------
   
   observeEvent(input$stl,{
-    rv[["game_log_text"]] <- log_action(input$undo, "Steal by ", input$selected_player)
+    rv[["game_log"]] <- c(rv[["game_log"]], log_action(input$undo, "Steal by ", input$selected_player))
     ri <- rowIndex()
     ci <- which(names(rv[["game_stats_raw"]]) == "STL")
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
   })
   
   observeEvent(input$tov,{
-    rv[["game_log_text"]] <- log_action(input$undo, "Turnover by ", input$selected_player)
+    rv[["game_log"]] <- c(rv[["game_log"]], log_action(input$undo, "Turnover by ", input$selected_player))
     ri <- rowIndex()
     ci <- which(names(rv[["game_stats_raw"]]) == "TOV")
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
@@ -504,14 +514,14 @@ function(input, output, session) {
   ### rebounds ---------------------------------------------------------
   
   observeEvent(input$dreb,{
-    rv[["game_log_text"]] <- log_action(input$undo, "Defensive rebound by ", input$selected_player)
+    rv[["game_log"]] <- c(rv[["game_log"]], log_action(input$undo, "Defensive rebound by ", input$selected_player))
     ri <- rowIndex()
     ci <- which(names(rv[["game_stats_raw"]]) == "DREB")
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
   })
   
   observeEvent(input$oreb,{
-    rv[["game_log_text"]] <- log_action(input$undo, "Offensive rebound by ", input$selected_player)
+    rv[["game_log"]] <- c(rv[["game_log"]], log_action(input$undo, "Offensive rebound by ", input$selected_player))
     ri <- rowIndex()
     ci <- which(names(rv[["game_stats_raw"]]) == "OREB")
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
@@ -520,14 +530,14 @@ function(input, output, session) {
   ### blocks and assists ---------------------------------------------------------
   
   observeEvent(input$blk,{
-    rv[["game_log_text"]] <- log_action(input$undo, "Block by ", input$selected_player)
+    rv[["game_log"]] <- c(rv[["game_log"]], log_action(input$undo, "Block by ", input$selected_player))
     ri <- rowIndex()
     ci <- which(names(rv[["game_stats_raw"]]) == "BLK")
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
   })
   
   observeEvent(input$ast,{
-    rv[["game_log_text"]] <- log_action(input$undo, "Assist by ", input$selected_player)
+    rv[["game_log"]] <- c(rv[["game_log"]], log_action(input$undo, "Assist by ", input$selected_player))
     ri <- rowIndex()
     ci <- which(names(rv[["game_stats_raw"]]) == "AST")
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()
@@ -536,7 +546,7 @@ function(input, output, session) {
   ### fouls ---------------------------------------------------------
   
   observeEvent(input$pf,{
-    rv[["game_log_text"]] <- log_action(input$undo, "Foul by ", input$selected_player)
+    rv[["game_log"]] <- c(rv[["game_log"]], log_action(input$undo, "Foul by ", input$selected_player))
     ri <- rowIndex()
     ci <- which(names(rv[["game_stats_raw"]]) == "PF")
     rv[["game_stats_raw"]][ri,ci] <- rv[["game_stats_raw"]][ri,ci] + change()

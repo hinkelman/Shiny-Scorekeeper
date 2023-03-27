@@ -6,6 +6,8 @@ library(DT)
 library(dplyr)
 library(tidyr)
 
+if (!dir.exists("gamelogs")) dir.create("gamelogs")
+
 stats_group_by_opts <- c("Team" = "TeamID", "Game" = "GameID", "Player" = "PlayerID")
 
 num_first <- function(num, first){
