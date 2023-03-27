@@ -8,11 +8,15 @@ library(tidyr)
 
 stats_group_by_opts <- c("Team" = "TeamID", "Game" = "GameID", "Player" = "PlayerID")
 
-create_name <- function(name, num){
+first_num <- function(name, num){
   ifelse(num == "" | is.na(num), name,
          ifelse(name == "" | is.na(name),
                 paste0("#", num),
                 paste0("#", num, " - ", name)))
+}
+
+first_last <- function(first, last){
+  ifelse(last == "", first, paste(first, last))
 }
 
 display_shooting <- function(data, ri, stat, ma = NULL){

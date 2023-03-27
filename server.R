@@ -217,7 +217,7 @@ function(input, output, session) {
 
     d <- rv[["players"]] %>% 
       filter(PlayerID %in% ids) %>%
-      mutate(PlayerName = ifelse(LastName == "", FirstName, paste(FirstName, LastName))) %>% 
+      mutate(PlayerName = first_last(FirstName, LastName)) %>% 
       arrange(FirstName)
     
     picker.ids <- d[["PlayerID"]]
@@ -307,7 +307,7 @@ function(input, output, session) {
     # setting roster initializes a new game
     rv[["game_stats_raw"]] <- rv[["roster"]] %>% 
       mutate(GameID = gid,
-             NumName = create_name(FirstName, Number),
+             NumName = first_num(FirstName, Number),
              FTM = 0L,
              FTA = 0L,
              FGM = 0L,
@@ -357,7 +357,7 @@ function(input, output, session) {
   numName <- reactive({
     req(rv[["roster"]], input$set_roster > 0)
     d <- rv[["roster"]] %>% 
-      mutate(NumName = create_name(FirstName, Number))
+      mutate(NumName = first_num(FirstName, Number))
     nn <- unique(d$NumName)
     return(nn)
   })
@@ -697,7 +697,7 @@ function(input, output, session) {
     d <- playersDisplay() %>% 
       select(PlayerID, FirstName, LastName) %>% 
       unique() %>%   # same player could be on more than one team
-      mutate(PlayerName = ifelse(LastName == "", FirstName, paste(FirstName, LastName))) %>% 
+      mutate(PlayerName = first_last(FirstName, LastName)) %>% 
       arrange(FirstName)
     
     picker.ids <- d[["PlayerID"]]
