@@ -173,7 +173,6 @@ dashboardPage(
               includeCSS("custom-css.css"),
               includeMarkdown("instructions.md")),
       tabItem(tabName = "background",
-              includeCSS("custom-css.css"),
               includeMarkdown("background.md"))
     )
   )
