@@ -1,5 +1,5 @@
 dashboardPage(
-
+  
   dashboardHeader(title = "Shiny Scorekeeper"),
   
   # Sidebar -----------------------------------------------------------------
@@ -10,7 +10,8 @@ dashboardPage(
       menuItem(text = "Roster", tabName = "roster", icon = icon("list")),
       menuItem(text = "Scorekeeper", tabName = "scorekeeper", icon = icon("basketball-ball")),
       menuItem("Stats Viewer", tabName = "stats_viewer", icon = icon("chart-line")),
-      menuItem("About", tabName = "about", icon = icon("info-circle")),
+      menuItem("Instructions", tabName = "instructions", icon = icon("info-circle")),
+      menuItem("Background", tabName = "background", icon = icon("clock-rotate-left")),
       conditionalPanel(
         condition = 'input.tabs == "scorekeeper"',
         br(),
@@ -168,10 +169,12 @@ dashboardPage(
               DTOutput("statisticsTable"),
               br()
       ),
-      tabItem(tabName = "about",
+      tabItem(tabName = "instructions",
               includeCSS("custom-css.css"),
-              includeMarkdown("about.md")
-      )
+              includeMarkdown("instructions.md")),
+      tabItem(tabName = "background",
+              includeCSS("custom-css.css"),
+              includeMarkdown("background.md"))
     )
   )
 )
