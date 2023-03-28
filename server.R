@@ -41,7 +41,7 @@ function(input, output, session) {
   
   output$teamsTable <- renderDT(
     rv[["teams"]], selection = "single", style = "bootstrap", rownames = FALSE,
-    editable = list(target = "cell", disable = list(columns = c(0))),              # disable TeamID
+    editable = list(target = "cell", disable = list(columns = 0)),                 # disable TeamID
     options = list(searching = FALSE, bPaginate = FALSE, info = FALSE))
   
   proxyTeams <- dataTableProxy("teamsTable")
@@ -106,9 +106,9 @@ function(input, output, session) {
   
   output$rosterTable <- renderDT(
     rv[["roster"]], selection = "single", style = "bootstrap", rownames = FALSE,
-    editable = list(target = "cell", disable = list(columns = c(0, 1))),        # disable PlayerID column
+    editable = list(target = "cell", disable = list(columns = 1)),              # disable PlayerID column
     options = list(searching = FALSE, bPaginate = FALSE, info = FALSE,
-                   columnDefs = list(list(visible = FALSE, targets = c(0)))))   # hide TeamID column
+                   columnDefs = list(list(visible = FALSE, targets = 0))))      # hide TeamID column
   
   proxyRoster <- dataTableProxy("rosterTable")
   
