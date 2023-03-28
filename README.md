@@ -19,7 +19,7 @@ install.packages(c("shiny", "shinydashboard", "shinyWidgets", "shinyjs", "DT", "
 shiny::runApp()
 ```
 
-Instructions for how to use the app are found [here](https://github.com/hinkelman/Shiny-Scorekeeper/blob/master/instructions.md). Background information about the app is found [here](https://github.com/hinkelman/Shiny-Scorekeeper/blob/master/about.md). 
+Instructions for how to use the app are found [here](https://github.com/hinkelman/Shiny-Scorekeeper/blob/master/instructions.md). Background information about the app is found [here](https://github.com/hinkelman/Shiny-Scorekeeper/blob/master/background.md). 
 
 ![roster](docs/img/roster.png)
 ![stats](docs/img/stats.png)
