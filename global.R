@@ -12,9 +12,10 @@ stats_group_by_opts <- c("Team" = "TeamID", "Game" = "GameID", "Player" = "Playe
 
 first_num <- function(first, num){
   # assumes that roster includes at least first name or number
-  if(num == "" | is.na(num)) return(first)
-  if(first == "" | is.na(first)) return(paste("#", num))
-  paste0(first, " (#", num, ")")
+  ifelse(num == "" | is.na(num), first,
+         ifelse(first == "" | is.na(first),
+                paste0("#", num),
+                paste0(first, " (#", num, ")")))
 }
 
 first_last <- function(first, last){
