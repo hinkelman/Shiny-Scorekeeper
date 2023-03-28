@@ -10,11 +10,11 @@ if (!dir.exists("gamelogs")) dir.create("gamelogs")
 
 stats_group_by_opts <- c("Team" = "TeamID", "Game" = "GameID", "Player" = "PlayerID")
 
-num_first <- function(num, first){
-  ifelse(num == "" | is.na(num), first,
-         ifelse(first == "" | is.na(first),
-                paste0("#", num),
-                paste0("#", num, " - ", first)))
+first_num <- function(first, num){
+  # assumes that roster includes at least first name or number
+  if(num == "" | is.na(num)) return(first)
+  if(first == "" | is.na(first)) return(paste("#", num))
+  paste0(first, " (#", num, ")")
 }
 
 first_last <- function(first, last){

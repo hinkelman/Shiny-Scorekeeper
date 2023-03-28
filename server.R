@@ -308,7 +308,7 @@ function(input, output, session) {
     # setting roster initializes a new game
     rv[["game_stats_raw"]] <- rv[["roster"]] %>% 
       mutate(GameID = gid,
-             NumFirst = num_first(Number, FirstName),
+             NumFirst = first_num(FirstName, Number ),
              FTM = 0L,
              FTA = 0L,
              FGM = 0L,
@@ -366,7 +366,7 @@ function(input, output, session) {
   numFirst <- reactive({
     req(rv[["roster"]], input$set_roster > 0)
     d <- rv[["roster"]] %>% 
-      mutate(NumFirst = num_first(Number, FirstName))
+      mutate(NumFirst = first_num(FirstName, Number ))
     unique(d$NumFirst)
   })
   
