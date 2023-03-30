@@ -308,7 +308,7 @@ function(input, output, session) {
     # setting roster initializes a new game
     rv[["game_stats_raw"]] <- rv[["roster"]] %>% 
       mutate(GameID = gid,
-             NumFirst = first_num(FirstName, Number ),
+             FirstNum = first_num(FirstName, Number),
              FTM = 0L,
              FTA = 0L,
              FGM = 0L,
@@ -363,21 +363,21 @@ function(input, output, session) {
   
   ## player info ---------------------------------------------------------
   
-  numFirst <- reactive({
+  firstNum <- reactive({
     req(rv[["roster"]], input$set_roster > 0)
     d <- rv[["roster"]] %>% 
-      mutate(NumFirst = first_num(FirstName, Number ))
-    unique(d$NumFirst)
+      mutate(FirstNum = first_num(FirstName, Number ))
+    unique(d$FirstNum)
   })
   
   output$selectedPlayer <- renderUI({
-    radioGroupButtons(inputId = "selected_player", choices = numFirst(), size = "normal", 
+    radioGroupButtons(inputId = "selected_player", choices = firstNum(), size = "normal", 
                       justified = TRUE, direction = "vertical")
   })
   
   output$DNP <- renderUI({
     # did not play
-    pickerInput(inputId = "dnp", label = "Did Not Play (DNP)", choices = numFirst(), multiple = TRUE)
+    pickerInput(inputId = "dnp", label = "Did Not Play (DNP)", choices = firstNum(), multiple = TRUE)
   })
   
   ## save game stats ---------------------------------------------------------
@@ -389,7 +389,7 @@ function(input, output, session) {
   gameStatsCalcSelected <- reactive({
     # this was how I initially solved this problem (i.e., after deciding not to save calculated columns)
     # wouldn't have to drop as many columns from rv[["game_stats_raw"]] but that dataframe doesn't include DNP column
-    select(rv[["game_stats_calc"]], -FirstName, -LastName, -Number, -NumFirst, -`FT%`, -`FG%`, -`3PT%`, -`TS%`, -EFF)  # drop columns contained in other tables (e.g., names and numbers) and non-counting stats, i.e., stats that can't be summarized with sum
+    select(rv[["game_stats_calc"]], -FirstName, -LastName, -Number, -FirstNum, -`FT%`, -`FG%`, -`3PT%`, -`TS%`, -EFF)  # drop columns contained in other tables (e.g., names and numbers) and non-counting stats, i.e., stats that can't be summarized with sum
   })
   
   observe({
@@ -413,7 +413,7 @@ function(input, output, session) {
   })
   
   rowIndex <- reactive({
-    which(rv[["game_stats_raw"]]$NumFirst == input$selected_player)
+    which(rv[["game_stats_raw"]]$FirstNum == input$selected_player)
   })
   
   output$gameLogLastTitle <- renderText({
@@ -569,14 +569,14 @@ function(input, output, session) {
       rv[["game_stats_calc"]] <- temp %>% mutate(DNP = 0)
     }else{
       rv[["game_stats_calc"]] <- temp %>% 
-        mutate(DNP = ifelse(NumFirst %in% input$dnp, 1, 0))
+        mutate(DNP = ifelse(FirstNum %in% input$dnp, 1, 0))
     }
   })
   
   ## display stats ---------------------------------------------------------
   
   rowIndexGSC <- reactive({
-    which(rv[["game_stats_calc"]][["NumFirst"]] == input$selected_player)
+    which(rv[["game_stats_calc"]][["FirstNum"]] == input$selected_player)
   })
   
   output$pts <- renderValueBox({
