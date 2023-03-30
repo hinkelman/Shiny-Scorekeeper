@@ -38,5 +38,5 @@ display_shooting <- function(data, ri, stat, ma = NULL){
       rvt.st = ifelse(stat == "TS%", "TS%", paste0(stat, " (", dri[[ma[1]]], "/", dri[[ma[2]]], ")"))
     }
   }
-  return(c(rvt, rvt.st))
+  c(rvt, rvt.st)
 }
