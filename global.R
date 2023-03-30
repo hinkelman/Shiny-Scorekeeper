@@ -28,9 +28,12 @@ log_action <- function(undo_bool, game_log_text, player){
 }
 
 display_shooting <- function(data, ri, stat, ma = NULL){
+  # ma = is length 2 vector of made and attempted
   dri = data[ri,]
   raw.value = dri[[stat]]
-  rvt = "--"
+  # rv was probably short for render value; not sure about the t
+  rvt = "--"                # initial value for renderValueBox
+  # st = subtitle for renderValueBox
   rvt.st = ifelse(stat == "TS%", "TS%", paste0(ma[1], " (0/0)"))
   if (length(raw.value) > 0){  
     if(!is.na(raw.value)){
