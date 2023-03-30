@@ -40,3 +40,15 @@ display_shooting <- function(data, ri, stat, ma = NULL){
   }
   c(rvt, rvt.st)
 }
+
+true_shooting <- function(PTS, FTA, FGA){
+  # https://en.wikipedia.org/wiki/True_shooting_percentage
+  round(PTS/(0.88 * FTA + 2 * FGA) * 100)
+}
+
+efficiency = function(PTS, REB, AST, STL, BLK, FGA, FGM, FTA, FTM, TOV){
+  # https://en.wikipedia.org/wiki/Efficiency_(basketball)
+  PTS + REB + AST + STL + BLK - (FGA - FGM) - (FTA - FTM) - TOV
+}
+
+
