@@ -565,8 +565,8 @@ function(input, output, session) {
              FGA = FGA2 + FGA3,
              `FG%` = round(FGM/FGA*100),
              `3PT%` = round(FGM3/FGA3*100),
-             `TS%` = round(PTS/(0.88 * FTA + 2 * FGA)*100),
-             EFF = (PTS + REB + AST + STL + BLK - (FGA - FGM) - (FTA - FTM) - TOV))
+             `TS%` = round(true_shooting(PTS, FTA, FGA)),
+             EFF = efficiency(PTS, REB, AST, STL, BLK, FGA, FGM, FTA, FTM, TOV))
     if (is.null(input$dnp)){  # if dnp is null, then no players selected
       rv[["game_stats_calc"]] <- temp %>% mutate(DNP = 0)
     }else{
@@ -729,6 +729,7 @@ function(input, output, session) {
       select(PlayerID, FirstName, LastName) %>% 
       unique() %>%   # same player could be on more than one team
       mutate(PlayerName = first_last(FirstName, LastName)) %>% 
+      filter(FirstName != "Opponent") %>%
       arrange(FirstName)
     
     picker.ids <- d[["PlayerID"]]
@@ -737,34 +738,42 @@ function(input, output, session) {
                 options = list(`actions-box` = TRUE))
   })
   
-  statistics <- reactive({
+  gameStats <- reactive({
     req(input$teamsTableStatsViewer_rows_selected, input$gamesTable_rows_selected)
+    rv[["game_stats"]] %>% 
+      left_join(select(rv[["teams"]], TeamID, Season, Team)) %>% 
+      left_join(select(rv[["games"]], GameID, Opponent)) %>% 
+      left_join(select(rv[["players"]], PlayerID, FirstName)) %>%
+      # Create Team to represent Opponent (which was recorded as the FirstName on a roster)
+      mutate(Team = ifelse(FirstName == "Opponent", Opponent, Team),
+             Team = paste0(Team, " (", Season, ")"))
+  })
+  
+  gameStatsSub <- reactive({
+    # req(input$teamsTableStatsViewer_rows_selected, input$gamesTable_rows_selected)
     ti <- gamesDisplay()$TeamID[input$gamesTable_rows_selected]
     gi <- gamesDisplay()$GameID[input$gamesTable_rows_selected]
-    gs_sub <- rv[["game_stats"]] %>% 
-      filter(TeamID %in% ti & GameID %in% gi & PlayerID %in% input$selected_players_stats)
+    out = filter(gameStats(), TeamID %in% ti & GameID %in% gi)
+    if ("PlayerID" %in% input$stats_group_by) out = filter(out, PlayerID %in% input$selected_players_stats)
+    out
+  })
+  
+  gameStatsSumm <- reactive({
+    gs = gameStatsSub()
     
-    gms <- gs_sub %>% 
+    gms <- gs %>% 
       group_by_at(input$stats_group_by) %>% 
       summarise(Games = length(unique(GameID)))
-    d <- gs_sub %>% 
-      filter(TeamID %in% ti & GameID %in% gi & PlayerID %in% input$selected_players_stats) %>% 
-      mutate(PTS = FTM + FGM2 * 2 + FGM3 * 3,
-             FGM = FGM2 + FGM3,
-             FGA = FGA2 + FGA3) %>% 
-      group_by_at(input$stats_group_by) %>% 
-      summarise_all(sum, na.rm = TRUE) %>% 
-      left_join(gms, by = input$stats_group_by) %>% 
+
+    d <- gs %>% 
+      group_by_at(input$stats_group_by) %>%
+      summarise(across(all_of(stats_cols), ~sum(., na.rm = TRUE))) %>%
+      left_join(gms) %>% 
       mutate(GP = Games - DNP)
+ 
     if (input$stats_type == "Per game"){
-      # not pretty but works correctly
-      if("PlayerID" %in% input$stats_group_by){
-        d <- mutate_at(d, vars(-all_of(input$stats_group_by)), 
-                       list(~round(. / GP, 2)))
-      }else{
-        d <- mutate_at(d, vars(-all_of(input$stats_group_by)), 
-                       list(~round(. / Games, 2)))
-      }
+      div = if("PlayerID" %in% input$stats_group_by) "GP" else "Games"
+      d = mutate(d, across(all_of(stats_cols), ~round(. / .data[[div]], 2)))
     } 
     d
   })
@@ -773,54 +782,49 @@ function(input, output, session) {
     req(input$stats_group_by)
     # probably a fancier way to do this, but starting with brute force
     grps <- input$stats_group_by
-    d <- statistics() %>% 
+    d <- gameStatsSumm() %>% 
       ungroup() %>% 
-      select(-stats_group_by_opts[!(stats_group_by_opts %in% grps)]) %>% # drop unselected group by columns
-      mutate(PTS = FTM + FGM2 * 2 + FGM3 * 3,
-             FGM = FGM2 + FGM3,
+      mutate(FGM = FGM2 + FGM3,
              FGA = FGA2 + FGA3,
              `FT%` = round(FTM/FTA*100),
              `FG%` = round(FGM/FGA*100),
              `3P%` = round(FGM3/FGA3*100),
-             `TS%` = round(PTS/(0.88 * FTA + 2 * FGA)*100))
-    if ("TeamID" %in% grps){
-      d <- d %>% 
-        left_join(rv[["teams"]])
-    }
+             `TS%` = round(true_shooting(PTS, FTA, FGA)))
+    
     if ("GameID" %in% grps){
-      d <- d %>% 
-        left_join(rv[["games"]])
-    }
-    if ("PlayerID" %in% grps){
-      d <- d %>% 
-        left_join(rv[["players"]]) %>% 
-        mutate(Player = FirstName,
-               EFF = round((PTS + REB + AST + STL + BLK - (FGA - FGM) - (FTA - FTM) - TOV), 2))
+      d <- left_join(d, rv[["games"]])
     }
     
-    if (all(c("TeamID", "GameID", "PlayerID") %in% grps)){
-      d <- select(d, Team, Date, Opponent, Player, GP, PTS, FGM, FGA, `FG%`, `3PM` = FGM3, `3PA` = FGA3, `3P%`, FTM, FTA, `FT%`, `TS%`, OREB, DREB, REB, AST, TOV, STL, BLK, PF, EFF)
+    if ("PlayerID" %in% grps){
+      d <- d %>%
+        left_join(rv[["players"]]) %>%
+        mutate(Player = FirstName,
+               EFF = round(efficiency(PTS, REB, AST, STL, BLK, FGA, FGM, FTA, FTM, TOV)))
     }
-    if ("TeamID" %in% grps && "GameID" %in% grps && !("PlayerID" %in% grps)){
-      d <- select(d, Team, Date, Opponent, PTS, FGM, FGA, `FG%`, `3PM` = FGM3, `3PA` = FGA3, `3P%`, FTM, FTA, `FT%`, `TS%`, OREB, DREB, REB, AST, TOV, STL, BLK, PF)
+    
+    if (all(c("Team", "GameID", "PlayerID") %in% grps)){
+      d <- select(d, c("Team", "Date", "Opponent", "Player", "GP", stats_display_cols, "EFF"))
     }
-    if (!("TeamID" %in% grps) && "GameID" %in% grps && !("PlayerID" %in% grps)){
-      d <- select(d, Date, Opponent, PTS, FGM, FGA, `FG%`, `3PM` = FGM3, `3PA` = FGA3, `3P%`, FTM, FTA, `FT%`, `TS%`, OREB, DREB, REB, AST, TOV, STL, BLK, PF)
+    if (!("Team" %in% grps) && "GameID" %in% grps && "PlayerID" %in% grps){
+      d <- select(d, c("Date", "Opponent", "Player", "GP", stats_display_cols, "EFF"))
     }
-    if ("TeamID" %in% grps && !("GameID" %in% grps) && !("PlayerID" %in% grps)){
-      d <- select(d, Team, Games, PTS, FGM, FGA, `FG%`, `3PM` = FGM3, `3PA` = FGA3, `3P%`, FTM, FTA, `FT%`, `TS%`, OREB, DREB, REB, AST, TOV, STL, BLK, PF)
+    if ("Team" %in% grps && "GameID" %in% grps && !("PlayerID" %in% grps)){
+      d <- select(d, c("Team", "Date", "Opponent", stats_display_cols))
+    }
+    if (!("Team" %in% grps) && "GameID" %in% grps && !("PlayerID" %in% grps)){
+      d <- select(d, c("Date", "Opponent", stats_display_cols))
+    }
+
+    if ("Team" %in% grps && !("GameID" %in% grps) && !("PlayerID" %in% grps)){
+      d <- select(d, c("Team", "Games", stats_display_cols))
       if (input$stats_type == "Per game") d <- select(d, -Games)
     }
-    if (!("TeamID" %in% grps) && !("GameID" %in% grps) && "PlayerID" %in% grps){
-      d <- select(d, Player, GP, PTS, FGM, FGA, `FG%`, `3PM` = FGM3, `3PA` = FGA3, `3P%`, FTM, FTA, `FT%`, `TS%`, OREB, DREB, REB, AST, TOV, STL, BLK, PF, EFF)
+    if (!("Team" %in% grps) && !("GameID" %in% grps) && "PlayerID" %in% grps){
+      d <- select(d, c("Player", "GP", stats_display_cols, "EFF"))
       if (input$stats_type == "Per game") d <- select(d, -GP)
     }
-    if ("TeamID" %in% grps && !("GameID" %in% grps) && "PlayerID" %in% grps){
-      d <- select(d, Team, Player, GP, PTS, FGM, FGA, `FG%`, `3PM` = FGM3, `3PA` = FGA3, `3P%`, FTM, FTA, `FT%`, `TS%`, OREB, DREB, REB, AST, TOV, STL, BLK, PF, EFF)
-      if (input$stats_type == "Per game") d <- select(d, -GP)
-    }
-    if (!("TeamID" %in% grps) && "GameID" %in% grps && "PlayerID" %in% grps){
-      d <- select(d, Date, Opponent, Player, GP, PTS, FGM, FGA, `FG%`, `3PM` = FGM3, `3PA` = FGA3, `3P%`, FTM, FTA, `FT%`, `TS%`, OREB, DREB, REB, AST, TOV, STL, BLK, PF, EFF)
+    if ("Team" %in% grps && !("GameID" %in% grps) && "PlayerID" %in% grps){
+      d <- select(d, c("Team", "Player", "GP", stats_display_cols, "EFF"))
       if (input$stats_type == "Per game") d <- select(d, -GP)
     }
     d

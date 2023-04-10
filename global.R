@@ -8,7 +8,7 @@ library(tidyr)
 
 if (!dir.exists("gamelogs")) dir.create("gamelogs")
 
-stats_group_by_opts <- c("Team" = "TeamID", "Game" = "GameID", "Player" = "PlayerID")
+stats_group_by_opts <- c("Team", "Game" = "GameID", "Player" = "PlayerID")
 
 first_num <- function(first, num){
   # assumes that roster includes at least first name or number
@@ -46,12 +46,21 @@ display_shooting <- function(data, ri, stat, ma = NULL){
 
 true_shooting <- function(PTS, FTA, FGA){
   # https://en.wikipedia.org/wiki/True_shooting_percentage
-  round(PTS/(0.88 * FTA + 2 * FGA) * 100)
+  PTS/(0.88 * FTA + 2 * FGA) * 100
 }
 
 efficiency = function(PTS, REB, AST, STL, BLK, FGA, FGM, FTA, FTM, TOV){
   # https://en.wikipedia.org/wiki/Efficiency_(basketball)
   PTS + REB + AST + STL + BLK - (FGA - FGM) - (FTA - FTM) - TOV
 }
+
+# counting stats stored in GameStats.csv
+# points and rebounds are only columns that could be calculated from other columns
+stats_cols = c("FTM", "FTA", "FGM2", "FGA2", "FGM3", "FGA3", "TOV", "STL", 
+               "DREB", "OREB", "BLK", "AST", "PF", "PTS", "REB", "DNP")
+
+# common columns used for statistics display
+stats_display_cols = c("PTS", "FGM", "FGA", "FG%", "3PM" = "FGM3", "3PA" = "FGA3", "3P%", 
+                       "FTM", "FTA", "FT%", "TS%", "OREB", "DREB", "REB", "AST", "TOV", "STL", "BLK", "PF")
 
 
