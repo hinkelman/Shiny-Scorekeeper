@@ -3,7 +3,7 @@
 
 #### Create and Set Roster
 
-Initially, the `Teams` table is empty. Add a row and double-click on cells to edit. Selecting a row in the `Teams` table brings up the `Roster` table. Add rows and double-click on cells to fill out the roster. Players previously entered on rosters for other teams can be selected from a dropdown menu to add to a roster. Players are linked to multiple teams via a `PlayerID` column. Updating a linked player's name on one team will update the player's name on all teams. The same player can have different numbers on different teams. The application detects unsaved changes to the tables. Save changes to enable setting a roster for use in scoring a game.
+Initially, the `Teams` table is empty. Add a row and double-click on cells to edit. Selecting a row in the `Teams` table brings up the `Roster` table. Add rows and double-click on cells to fill out the roster. Players previously entered on rosters for other teams can be selected from a dropdown menu to add to a roster. Players are linked to multiple teams via a `PlayerID` column. Updating a linked player's name on one team will update the player's name on all teams. The same player can have different numbers on different teams. The application detects unsaved changes to the tables. Save changes to enable setting a roster for use in scoring a game. Shiny Scorekeeper is designed for tracking only one team in each game. However, if you include a player on each roster with the first name of `Opponent`, then you can you track team stats for the opponent with that "player" on the roster.  
 
 #### Score Game
 
