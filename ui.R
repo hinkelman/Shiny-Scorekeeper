@@ -25,11 +25,6 @@ page_navbar(
 #   dashboardSidebar(
 #     sidebarMenu(
 #       id = "tabs",
-#       menuItem(text = "Roster", tabName = "roster", icon = icon("list")),
-#       menuItem(text = "Scorekeeper", tabName = "scorekeeper", icon = icon("basketball-ball")),
-#       menuItem("Stats Viewer", tabName = "stats_viewer", icon = icon("chart-line")),
-#       menuItem("Instructions", tabName = "instructions", icon = icon("info-circle")),
-#       menuItem("Background", tabName = "background", icon = icon("clock-rotate-left")),
 #       conditionalPanel(
 #         condition = 'input.tabs == "scorekeeper"',
 #         br(),
@@ -186,12 +181,7 @@ page_navbar(
 #               hidden(radioGroupButtons(inputId = "stats_type", label = NULL, choices = c("Per game", "Total"))),    
 #               DTOutput("statisticsTable"),
 #               br()
-#       ),
-#       tabItem(tabName = "instructions",
-#               includeCSS("custom-css.css"),
-#               includeMarkdown("instructions.md")),
-#       tabItem(tabName = "background",
-#               includeMarkdown("background.md"))
+#       )
 #     )
 #   )
 # )
