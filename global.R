@@ -1,10 +1,10 @@
 library(shiny)
 library(bslib)
 library(shinyWidgets)
-library(shinyjs)
 library(DT)
 library(dplyr)
 library(tidyr)
+library(scorekeepeR)
 
 # if (!dir.exists("gamelogs")) dir.create("gamelogs")
 # 
