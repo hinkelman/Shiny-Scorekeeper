@@ -1,5 +1,7 @@
 page_navbar(
   title = "Shiny Scorekeeper",
+  window_title = "Scorekeeper",
+  fillable = FALSE,
   sidebar = sidebar(
     open = FALSE
   ),
@@ -7,8 +9,11 @@ page_navbar(
   nav_panel("Roster"),
   nav_panel("Scorekeeper"),
   nav_panel("Stats Viewer"),
-  nav_panel("Instructions"),
-  nav_panel("Background")
+  nav_panel("Instructions",
+            includeCSS("custom-css.css"),
+            card(includeMarkdown("instructions.md"))),
+  nav_panel("Background",
+            card(includeMarkdown("background.md")))
 )
 
 # dashboardPage(
