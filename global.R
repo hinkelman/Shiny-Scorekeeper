@@ -6,6 +6,21 @@ library(dplyr)
 library(tidyr)
 library(scorekeepeR)
 
+teams_file = file.path("data", "Teams.csv")
+teams = if (file.exists(teams_file)) read.csv(teams_file) else init_teams_table()
+
+players_file = file.path("data", "Players.csv")
+players = if (file.exists(players_file)) read.csv(players_file) else init_players_table()
+
+
+# players <- read.csv(file.path(data_fldr, "Players.csv"), stringsAsFactors = FALSE, colClasses =  c("integer", "character", "character")) # specifying class important b/c an empty column will be read as logical; caused problems with paste
+# # rosters are the players on each team (players can be on more than one team)
+# rosters <- read.csv(file.path(data_fldr, "Rosters.csv"), stringsAsFactors = FALSE)
+# # track IDs separately to avoid duplicating IDs
+# gameIDs <- read.csv(file.path(data_fldr, "GameIDs.csv"), stringsAsFactors = FALSE) 
+# games <- read.csv(file.path(data_fldr, "Games.csv"), stringsAsFactors = FALSE)
+# game_stats <- read.csv(file.path(data_fldr, "GameStats.csv"), stringsAsFactors = FALSE) 
+
 # if (!dir.exists("gamelogs")) dir.create("gamelogs")
 # 
 # stats_group_by_opts <- c("Team", "Game" = "GameID", "Player" = "PlayerID")

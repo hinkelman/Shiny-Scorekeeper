@@ -2,11 +2,16 @@ page_navbar(
   title = "Shiny Scorekeeper",
   window_title = "Scorekeeper",
   fillable = FALSE,
+  id = "nav",
   sidebar = sidebar(
-    open = FALSE
+    conditionalPanel(
+      condition = 'input.nav == "Roster"',
+      rosterSB("roster")
+    )
   ),
   nav_spacer(),
-  nav_panel("Roster"),
+  nav_panel("Roster",
+            rosterUI("roster")),
   nav_panel("Scorekeeper"),
   nav_panel("Stats Viewer"),
   nav_panel("Instructions",

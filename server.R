@@ -1,67 +1,19 @@
 
 function(input, output, session) {
   
-  # # Source functions ---------------------------------------------------------
-  # 
-  # # Load data ---------------------------------------------------------
-  # 
-  # # hinkdata is my personal dataset; not included on github
-  # data_fldr <- ifelse(dir.exists("hinkdata"), "hinkdata", "data")
-  # 
-  # # using read.csv instead of read_csv b/c there was an issue with DT (maybe related to hiding columns; or issue was with other package? can't remember)
-  # # track IDs separately to avoid duplicating IDs
-  # teamIDs <- read.csv(file.path(data_fldr, "TeamIDs.csv"), stringsAsFactors = FALSE) 
-  # teams <- read.csv(file.path(data_fldr, "Teams.csv"), stringsAsFactors = FALSE)
-  # # track IDs separately to avoid duplicating IDs
-  # playerIDs <- read.csv(file.path(data_fldr, "PlayerIDs.csv"), stringsAsFactors = FALSE)
-  # players <- read.csv(file.path(data_fldr, "Players.csv"), stringsAsFactors = FALSE, colClasses =  c("integer", "character", "character")) # specifying class important b/c an empty column will be read as logical; caused problems with paste
-  # # rosters are the players on each team (players can be on more than one team)
-  # rosters <- read.csv(file.path(data_fldr, "Rosters.csv"), stringsAsFactors = FALSE)
-  # # track IDs separately to avoid duplicating IDs
-  # gameIDs <- read.csv(file.path(data_fldr, "GameIDs.csv"), stringsAsFactors = FALSE) 
-  # games <- read.csv(file.path(data_fldr, "Games.csv"), stringsAsFactors = FALSE)
-  # game_stats <- read.csv(file.path(data_fldr, "GameStats.csv"), stringsAsFactors = FALSE) 
-  # 
-  # # Reactive values ---------------------------------------------------------
-  # 
-  # # rv <- reactiveValues(teams = teams, players = players, 
-  # #                      rosters = rosters, roster = NULL, 
-  # #                      game_id = NULL, games = games,
-  # #                      game_stats = game_stats, game_stats_raw = NULL, game_stats_calc = NULL)
-  # 
-  # rv <- reactiveValues(teams = arrange(teams, desc(Season)), players = players, 
-  #                      rosters = rosters, roster = NULL, 
-  #                      game_id = NULL, games = arrange(games, desc(Date)),
-  #                      game_stats = game_stats, game_stats_raw = NULL, game_stats_calc = NULL,
+  rosterServer("roster")
+  
+  
+  # Reactive values ---------------------------------------------------------
+
+  # rv <- reactiveValues(teams = teams, players = players,
+  #                      rosters = NULL, roster = NULL,
+  #                      game_id = NULL, games = NULL,
+  #                      game_stats = NULL, game_stats_raw = NULL, game_stats_calc = NULL,
   #                      game_log = NULL)
-  # 
-  # # Teams ---------------------------------------------------------
-  # 
-  # ## table ---------------------------------------------------------
-  # 
-  # output$teamsTable <- renderDT(
-  #   rv[["teams"]], selection = "single", style = "bootstrap", rownames = FALSE,
-  #   editable = list(target = "cell", disable = list(columns = 0)),                 # disable TeamID
-  #   options = list(searching = FALSE, bPaginate = FALSE, info = FALSE))
-  # 
-  # proxyTeams <- dataTableProxy("teamsTable")
-  # 
-  # ## edit cell ---------------------------------------------------------
-  # 
-  # observeEvent(input$teamsTable_cell_edit, {
-  #   info <- input$teamsTable_cell_edit
-  #   i <- info$row
-  #   j <- info$col + 1L  # column index offset by 1
-  #   v <- info$value
-  #   rv[["teams"]][i, j] <- coerceValue(v, rv[["teams"]][i, j])
-  #   replaceData(proxyTeams, rv[["teams"]], resetPaging = FALSE, rownames = FALSE)  # important
-  # })
-  # 
-  # ## delete row ---------------------------------------------------------
-  # 
-  # observe({
-  #   toggle("delete_teams_row", condition = nrow(rv[["teams"]]) > 0 & !is.null(input$teamsTable_rows_selected))
-  # })
+  
+  
+
   # 
   # observeEvent(input$delete_teams_row,{
   #   req(input$teamsTable_rows_selected)
