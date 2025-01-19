@@ -11,9 +11,15 @@ page_navbar(
   nav_panel("Stats Viewer"),
   nav_panel("Instructions",
             includeCSS("custom-css.css"),
-            card(includeMarkdown("instructions.md"))),
+            card(
+              includeMarkdown(file.path("markdown", "instructions.md"))
+            )
+  ),
   nav_panel("Background",
-            card(includeMarkdown("background.md")))
+            card(
+              includeMarkdown(file.path("markdown", "background.md"))
+            )
+  )
 )
 
 # dashboardPage(
@@ -46,7 +52,7 @@ page_navbar(
 #     tags$style(".bttn-gradient.bttn-default  {color: #5D8CB9 !important;}"),
 #     tags$style(HTML("hr {border-top: 1px solid #000000;}")),
 #     useSweetAlert(),
-#     useShinyjs(),  # Include shinyjs
+
 #     tabItems(
 #       # Roster -----------------------------------------------------------------
 #       tabItem(tabName = "roster",

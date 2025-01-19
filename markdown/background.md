@@ -19,7 +19,6 @@ The following is a list of missing features that I decided not to pursue. Some i
 * [shiny](https://shiny.posit.co)
 * [bslib](https://rstudio.github.io/bslib/index.html)
 * [shinyWidgets](https://dreamrs.github.io/shinyWidgets/index.html)
-* [shinyjs](https://deanattali.com/shinyjs/)
 * [DT](https://rstudio.github.io/DT/)
 * [dplyr](https://dplyr.tidyverse.org)
 * [tidyr](https://tidyr.tidyverse.org)
