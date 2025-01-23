@@ -6,11 +6,16 @@ library(dplyr)
 library(tidyr)
 library(scorekeepeR)
 
-teams_file = file.path("data", "Teams.csv")
+data_fldr = "data"
+if (!dir.exists(data_fldr)) dir.create(data_fldr)
+teams_file = file.path(data_fldr, "Teams.csv")
 teams = if (file.exists(teams_file)) read.csv(teams_file) else init_teams_table()
 
-players_file = file.path("data", "Players.csv")
+players_file = file.path(data_fldr, "Players.csv")
 players = if (file.exists(players_file)) read.csv(players_file) else init_players_table()
+
+rosters_file = file.path(data_fldr, "Rosters.csv")
+rosters = if (file.exists(rosters_file)) read.csv(rosters_file) else init_rosters_table()
 
 
 # players <- read.csv(file.path(data_fldr, "Players.csv"), stringsAsFactors = FALSE, colClasses =  c("integer", "character", "character")) # specifying class important b/c an empty column will be read as logical; caused problems with paste
