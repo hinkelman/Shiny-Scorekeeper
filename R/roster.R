@@ -155,7 +155,12 @@ rosterServer <- function(id){
       
       d <- rv[["players"]] |> 
         filter(PlayerID %in% ids) |> 
-        mutate(PlayerName = ifelse(LastName == "", FirstName, paste(FirstName, LastName))) |> 
+        mutate(PlayerName = case_when(
+          is.na(FirstName) & is.na(LastName) ~ NA_character_,
+          is.na(FirstName) ~ LastName,
+          is.na(LastName) ~ FirstName,
+          .default = paste(FirstName, LastName))) |> 
+        filter(!is.na(PlayerName)) |> 
         arrange(FirstName)
       
       picker_ids <- setNames(d[["PlayerID"]], d[["PlayerName"]])
@@ -196,7 +201,7 @@ rosterServer <- function(id){
                       isTRUE(all.equal(players, rv[["players"]])) & 
                       isTRUE(all.equal(rosters, rv[["rosters"]])))
       updateActionButton(session, "save_teams_roster_changes", disabled = save_state)
-
+      
       updateActionButton(session, "set_roster", 
                          disabled = (!save_state | 
                                        is.null(input$teamsTable_rows_selected) |
@@ -205,7 +210,6 @@ rosterServer <- function(id){
     
     observeEvent(input$save_teams_roster_changes,{
       # write teams, rosters, & players from memory to disk
-      glimpse(rv[["teams"]])
       write.csv(rv[["teams"]], file.path(data_fldr, "Teams.csv"), row.names = FALSE)
       write.csv(rv[["players"]], file.path(data_fldr, "Players.csv"), row.names = FALSE)
       write.csv(rv[["rosters"]], file.path(data_fldr, "Rosters.csv"), row.names = FALSE)
