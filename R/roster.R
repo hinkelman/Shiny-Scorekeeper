@@ -81,7 +81,7 @@ rosterServer <- function(id){
     # Roster View -------------------------------------------------------------
     
     output$rosterView <- renderDT({
-      req(nrow(rv[["teams"]]) > 0, input$teamsTable_rows_selected)
+      req(nrow(rv[["teams"]]) > 0, input$teamsTable_rows_selected, rv[["roster"]])
       rv[["roster"]]
     }, style = "default", rownames = FALSE, 
     selection = "single", editable = list(target = "cell"),                 
@@ -219,6 +219,9 @@ rosterServer <- function(id){
       rosters <<- rv[["rosters"]]
     })
     
+    observeEvent(input$set_roster,{
+      roster <<- rv[["roster"]]
+    })
     
   })
 }

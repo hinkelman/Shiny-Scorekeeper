@@ -3,6 +3,10 @@ function(input, output, session) {
   
   rosterServer("roster")
   
+  observeEvent(input[["roster-set_roster"]], {
+    updateTabsetPanel(session, "nav", "Scorekeeper")
+  })
+  
   
   # Reactive values ---------------------------------------------------------
 
