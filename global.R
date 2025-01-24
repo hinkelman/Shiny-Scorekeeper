@@ -6,8 +6,6 @@ library(dplyr)
 library(tidyr)
 library(scorekeepeR)
 
-if (exists("roster")) rm("roster")
-
 data_fldr = "data"
 if (!dir.exists(data_fldr)) dir.create(data_fldr)
 teams_file = file.path(data_fldr, "Teams.csv")
