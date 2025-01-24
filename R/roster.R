@@ -32,7 +32,7 @@ rosterUI <- function(id){
 
 rosterServer <- function(id){
   moduleServer(id, function(input, output, session) {
-    ns <- session$ns
+    ns = NS(id)
     
     rv <- reactiveValues(teams = teams, players = players, rosters = rosters,
                          roster = NULL)
@@ -219,10 +219,8 @@ rosterServer <- function(id){
       rosters <<- rv[["rosters"]]
     })
     
-    observeEvent(input$set_roster,{
-      roster <<- rv[["roster"]]
-    })
-    
+    # return the roster
+    reactive(if (input$set_roster == 0) NULL else rv[["roster"]])
   })
 }
 
