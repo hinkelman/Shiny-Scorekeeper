@@ -22,3 +22,4 @@ The following is a list of missing features that I decided not to pursue. Some i
 * [DT](https://rstudio.github.io/DT/)
 * [dplyr](https://dplyr.tidyverse.org)
 * [tidyr](https://tidyr.tidyverse.org)
+* [ids](https://reside-ic.github.io/ids/)
