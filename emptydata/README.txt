@@ -1,1 +1,0 @@
-Folder contains empty versions of all of the required files in the data folder.
