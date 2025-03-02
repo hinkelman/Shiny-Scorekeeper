@@ -210,9 +210,9 @@ rosterServer <- function(id){
     
     observeEvent(input$save_teams_roster_changes,{
       # write teams, rosters, & players from memory to disk
-      write.csv(rv[["teams"]], file.path(data_fldr, "Teams.csv"), row.names = FALSE)
-      write.csv(rv[["players"]], file.path(data_fldr, "Players.csv"), row.names = FALSE)
-      write.csv(rv[["rosters"]], file.path(data_fldr, "Rosters.csv"), row.names = FALSE)
+      write.csv(rv[["teams"]], file.path(data_dir, "Teams.csv"), row.names = FALSE)
+      write.csv(rv[["players"]], file.path(data_dir, "Players.csv"), row.names = FALSE)
+      write.csv(rv[["rosters"]], file.path(data_dir, "Rosters.csv"), row.names = FALSE)
       # update non-reactive versions to keep track of changes
       teams <<- rv[["teams"]]
       players <<- rv[["players"]]
