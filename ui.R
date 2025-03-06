@@ -20,16 +20,18 @@ page_navbar(
   nav_panel("Scorekeeper",
             scorekeeperUI("scorekeeper")),
   nav_panel("Stats Viewer"),
-  nav_panel("Instructions",
-            includeCSS("custom-css.css"),
-            card(
-              includeMarkdown(file.path("markdown", "instructions.md"))
-            )
-  ),
-  nav_panel("Background",
-            card(
-              includeMarkdown(file.path("markdown", "background.md"))
-            )
+  nav_menu(title = "About", align = "right",
+           nav_panel("Instructions",
+                     includeCSS("custom-css.css"),
+                     card(
+                       includeMarkdown(file.path("markdown", "instructions.md"))
+                     )
+           ),
+           nav_panel("Background",
+                     card(
+                       includeMarkdown(file.path("markdown", "background.md"))
+                     )
+           )
   )
 )
 
