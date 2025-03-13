@@ -203,73 +203,92 @@ scorekeeperServer <- function(id, roster_data){
     ## update stats ---------------------------------------------------------
     
     gsSub <- reactive({
+      req(rv[["roster"]])
       gs = gameStats()
       gs[gs[["PlayerID"]] == input$selected_player_id & gs[["GameID"]] == rv[["game_id"]], ]
     })
     
-    output$pts <- renderText({ gsSub()[["PTS"]] })
+    output$pts <- renderText({ 
+      req(rv[["roster"]])
+      gsSub()[["PTS"]] 
+    })
     
     output$ftPer <- renderText({ 
+      req(rv[["roster"]])
       per = gsSub()[["FT%"]] 
       if (is.na(per)) "--" else paste0(per, "%")
     })
     
     output$ftTally <- renderText({ 
+      req(rv[["roster"]])
       paste0(gsSub()[["FTM"]], "/", gsSub()[["FTA"]]) 
     })
     
     output$fgPer <- renderText({ 
+      req(rv[["roster"]])
       per = gsSub()[["FG%"]] 
       if (is.na(per)) "--" else paste0(per, "%")
     })
     
     output$fgTally <- renderText({ 
+      req(rv[["roster"]])
       paste0(gsSub()[["FGM"]], "/", gsSub()[["FGA"]]) 
     })
     
     output$threePtPer <- renderText({ 
+      req(rv[["roster"]])
       per = gsSub()[["3PT%"]] 
       if (is.na(per)) "--" else paste0(per, "%")
     })
     
     output$threePtTally <- renderText({ 
+      req(rv[["roster"]])
       paste0(gsSub()[["FGM3"]], "/", gsSub()[["FGA3"]]) 
     })
     
     output$ts <- renderText({ 
+      req(rv[["roster"]])
       per = gsSub()[["TS%"]] 
       if (is.na(per)) "--" else paste0(per, "%")
     })
     
     output$eff <- renderText({ 
+      req(rv[["roster"]])
       gsSub()[["EFF"]]
     })
     
     output$rebTotal <- renderText({ 
+      req(rv[["roster"]])
       gsSub()[["REB"]] 
     })
     
     output$rebTally <- renderText({ 
+      req(rv[["roster"]])
       paste0(gsSub()[["DREB"]], " + ", gsSub()[["OREB"]]) 
     })
     
     output$blk <- renderText({ 
+      req(rv[["roster"]])
       gsSub()[["BLK"]] 
     })
     
     output$stl <- renderText({ 
+      req(rv[["roster"]])
       gsSub()[["STL"]] 
     })
     
     output$ast <- renderText({ 
+      req(rv[["roster"]])
       gsSub()[["AST"]] 
     })
     
     output$tov <- renderText({ 
+      req(rv[["roster"]])
       gsSub()[["TOV"]] 
     })
     
     output$pf <- renderText({ 
+      req(rv[["roster"]])
       gsSub()[["PF"]] 
     })
     
