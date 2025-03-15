@@ -23,9 +23,7 @@ scorekeeperUI <- function(id){
     layout_columns(
       col_widths = c(3, 6, 3),
       div(
-        br(),
-        radioButtons(ns("selected_player_id"), label = NULL,
-                     choices = c(""),  width = "100%"),
+        radioButtons(ns("selected_player_id"), label = "Select Player", choices = c("")),
         pickerInput(ns("dnp"), label = "Did Not Play (DNP)", choices = c(""),
                     multiple = TRUE, width = "100%")
       ),
