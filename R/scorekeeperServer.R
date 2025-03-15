@@ -1,6 +1,6 @@
 
 
-scorekeeperServer <- function(id, roster_data){
+scorekeeperServer <- function(id, roster_out){
   moduleServer(id, function(input, output, session) {
     
     output$rosterWarning <- renderText({
@@ -15,9 +15,10 @@ scorekeeperServer <- function(id, roster_data){
                          player_names = NULL, games = NULL, game_stats = NULL,
                          game_log = NULL)
     
-    observeEvent(roster_data(),{
-      rv[["roster"]] = create_player_names(roster_data())
-      rv[["team_id"]] = rv[["roster"]]$TeamID[1] # same TeamID for all rows in roster_data()
+    observe({
+      req(roster_out()[["roster"]])
+      rv[["roster"]] = create_player_names(roster_out()[["roster"]])
+      rv[["team_id"]] = rv[["roster"]]$TeamID[1] # same TeamID for all rows in roster_out()[["roster"]]
       rv[["game_stats"]] = add_game_stats(game_stats, rv[["roster"]]$PlayerID, rv[["game_id"]])
     })
     
@@ -292,6 +293,10 @@ scorekeeperServer <- function(id, roster_data){
       gsSub()[["PF"]] 
     })
     
+    # return teams and roster
+    reactive(list("roster" = rv[["roster"]],
+                  "games" = rv[["games"]], 
+                  "game_stats" = rv[["game_stats"]]))
   })
 }
 

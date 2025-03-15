@@ -188,7 +188,8 @@ rosterServer <- function(id){
       rosters <<- rv[["rosters"]]
     })
     
-    # return the roster
-    reactive(if (input$set_roster == 0) NULL else rv[["roster"]])
+    # return teams and roster
+    reactive(list("teams" = rv[["teams"]], 
+                  "roster" = if (input$set_roster == 0) NULL else rv[["roster"]]))
   })
 }

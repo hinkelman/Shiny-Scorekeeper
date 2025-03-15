@@ -1,13 +1,15 @@
 
 function(input, output, session) {
   
-  rosterData <- rosterServer("roster")
+  rosterOut <- rosterServer("roster")
   
   observeEvent(input[["roster-set_roster"]], {
     updateTabsetPanel(session, "nav", "Scorekeeper")
   })
   
-  scorekeeperServer("scorekeeper", rosterData)
+  scorekeeperOut <- scorekeeperServer("scorekeeper", rosterOut)
+  
+  
   
   # # Stats Viewer ---------------------------------------------------------
   # 
