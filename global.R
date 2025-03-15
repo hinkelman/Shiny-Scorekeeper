@@ -16,7 +16,12 @@ players_file = file.path(data_dir, "Players.csv")
 players = if (file.exists(players_file)) read.csv(players_file) else init_players_table()
 
 rosters_file = file.path(data_dir, "Rosters.csv")
-rosters = if (file.exists(rosters_file)) read.csv(rosters_file) else init_rosters_table()
+if (file.exists(rosters_file)){
+  rosters = read.csv(rosters_file) |> 
+    mutate(Number = as.character(Number))
+} else { 
+  rosters = init_rosters_table()
+}
 
 games_file = file.path(data_dir, "Games.csv")
 games = if (file.exists(games_file)) read.csv(games_file) else init_games_table()
