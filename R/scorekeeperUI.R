@@ -11,10 +11,8 @@ scorekeeperSB <- function(id){
       textInput(ns("opp_score"), label = NULL, placeholder = "Opp")
     ),
     br(),
-    p(align = "center", actionButton(ns("save_game_info"), "Save game info", 
-                                     icon = icon("save"), disabled = TRUE)),
-    actionButton(ns("save_game_stats"), "Save game stats", icon = icon("save"), 
-                 width = "100%", disabled = TRUE)
+    p(align = "center", actionButton(ns("save_game_stats"), "Save game stats", 
+                                     icon = icon("save"), disabled = TRUE))
   )
 }
 

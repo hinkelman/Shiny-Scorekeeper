@@ -53,32 +53,20 @@ scorekeeperServer <- function(id, roster_out){
     
     observe({
       req(rv[["game_id"]], rv[["team_id"]])
-      input$save_game_info
+      input$save_game_stats
       # update rv[["games"]] any time game info changes 
       rv[["games"]] = update_games_row(games, rv[["team_id"]], rv[["game_id"]], gameDate(), 
                                        input$opponent, input$team_score, input$opp_score)
-      save_state = isTRUE(all.equal(games, rv[["games"]]))
-      updateActionButton(session, "save_game_info", disabled = save_state)
-    })
-    
-    observeEvent(input$save_game_info,{
-      # write games from memory to disk
-      write.csv(rv[["games"]], file.path(data_dir, "Games.csv"), row.names = FALSE)
-      # update non-reactive versions to keep track of changes
-      games <<- rv[["games"]]
-      # if game info changes, then game log header also changed (so rewriting whole file)
-      cat(c(gameLogHeader(), rv[["game_log"]]), file = gameLogPath(), sep = "\n") 
-    })
-    
-    observe({
-      req(rv[["game_id"]], rv[["team_id"]])
-      input$save_game_stats
-      save_state = isTRUE(all.equal(game_stats, rv[["game_stats"]]))
+      save_state = isTRUE(all.equal(games, rv[["games"]])) & isTRUE(all.equal(game_stats, rv[["game_stats"]]))
       updateActionButton(session, "save_game_stats", disabled = save_state)
     })
     
     observeEvent(input$save_game_stats,{
+      # write games from memory to disk
+      write.csv(rv[["games"]], file.path(data_dir, "Games.csv"), row.names = FALSE)
       write.csv(rv[["game_stats"]], file.path(data_dir, "GameStats.csv"), row.names = FALSE)
+      # update non-reactive versions to keep track of changes
+      games <<- rv[["games"]]
       game_stats <<- rv[["game_stats"]]
       cat(c(gameLogHeader(), rv[["game_log"]]), file = gameLogPath(), sep = "\n") 
     })
