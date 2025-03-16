@@ -1,7 +1,6 @@
 page_navbar(
   title = "Shiny Scorekeeper",
   window_title = "Scorekeeper",
-  theme = bs_theme(preset = "bootstrap"),
   fillable = FALSE,
   id = "nav",
   sidebar = sidebar(
