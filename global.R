@@ -6,6 +6,9 @@ library(dplyr)
 library(tidyr)
 library(scorekeepeR)
 
+# max height of value boxes
+mxht = "120px"
+
 data_dir = "data"
 if (!dir.exists(data_dir)) dir.create(data_dir)
 
@@ -30,8 +33,6 @@ game_stats_file = file.path(data_dir, "GameStats.csv")
 game_stats = if (file.exists(game_stats_file)) read.csv(game_stats_file) else init_game_stats_table()
 
 if (!dir.exists(file.path(data_dir, "gamelogs"))) dir.create(file.path(data_dir, "gamelogs"))
-
-mxht = "120px"
 
 # stats_group_by_opts <- c("Team", "Game" = "GameID", "Player" = "PlayerID")
 
