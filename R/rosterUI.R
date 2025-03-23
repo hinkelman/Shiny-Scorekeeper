@@ -13,17 +13,21 @@ rosterSB <- function(id){
 
 rosterUI <- function(id){
   ns <- NS(id)
-  tagList(
-    DTOutput(ns("teamsTable")),
-    br(),
-    layout_column_wrap(
-      actionButton(ns("add_teams_row"), "Add row", icon = icon("plus-square")),
-      actionButton(ns("delete_teams_row"), "Delete row", icon = icon("trash"), disabled = TRUE)
+  layout_columns(
+    col_widths = c(6, 6),
+    div(
+      DTOutput(ns("teamsTable")),
+      br(),
+      layout_column_wrap(
+        actionButton(ns("add_teams_row"), "Add row", icon = icon("plus-square")),
+        actionButton(ns("delete_teams_row"), "Delete row", icon = icon("trash"), disabled = TRUE)
+      )
     ),
-    hr(),
-    DTOutput(ns("rosterView")),
-    br(),
-    uiOutput(ns("rosterAddDelete")),
-    uiOutput(ns("previousPlayers"))
+    div(
+      DTOutput(ns("rosterView")),
+      br(),
+      uiOutput(ns("rosterAddDelete")),
+      uiOutput(ns("previousPlayers"))
+    )
   )
 }
