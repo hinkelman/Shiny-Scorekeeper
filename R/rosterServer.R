@@ -137,7 +137,7 @@ rosterServer <- function(id){
       layout_column_wrap(
         pickerInput(ns("selected_players"), "Select players",
                     choices = picker_ids, multiple = TRUE, 
-                    options = list(`live-search` = TRUE)),
+                    options = list(size = 7, `live-search` = TRUE)),
         actionButton(ns("add_selected_players"), "Add selected players", 
                      style = "margin-top: 32px;", icon = icon("plus-square"))
       )
