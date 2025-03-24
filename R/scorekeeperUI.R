@@ -7,8 +7,8 @@ scorekeeperSB <- function(id){
     h5(align = "center", "Final Score"),
     layout_columns(
       col_widths = c(6, 6),
-      textInput(ns("team_score"), label = NULL, placeholder = "Team"),
-      textInput(ns("opp_score"), label = NULL, placeholder = "Opp")
+      textInput(ns("team_score"), label = NULL, placeholder = "Team", width = "60%"),
+      textInput(ns("opp_score"), label = NULL, placeholder = "Opp", width = "60%")
     ),
     br(),
     p(align = "center", actionButton(ns("save_game_stats"), "Save game stats", 
