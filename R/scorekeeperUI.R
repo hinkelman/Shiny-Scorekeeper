@@ -27,7 +27,7 @@ scorekeeperUI <- function(id){
         br(),
         pickerInput(ns("dnp"), label = "Did Not Play (DNP)", choices = c(""),
                     multiple = TRUE, width = "100%", 
-                    options = list(size = 7, `live-search` = TRUE))
+                    options = pickerOptions(size = 7, `live-search` = TRUE))
       ),
       div(
         layout_columns(
