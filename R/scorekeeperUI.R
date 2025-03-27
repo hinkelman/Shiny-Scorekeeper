@@ -3,12 +3,12 @@ scorekeeperSB <- function(id){
   ns <- NS(id)
   tagList(
     dateInput(ns("game_date"), "Date"),
-    textInput(ns("opponent"), label = "Opponent", width = "100%"),
+    textInput(ns("opponent"), label = "Opponent"),
     h5(align = "center", "Final Score"),
     layout_columns(
       col_widths = c(6, 6),
-      textInput(ns("team_score"), label = NULL, placeholder = "Team", width = "60%"),
-      textInput(ns("opp_score"), label = NULL, placeholder = "Opp", width = "60%")
+      textInput(ns("team_score"), label = NULL, placeholder = "Team"),
+      textInput(ns("opp_score"), label = NULL, placeholder = "Opp")
     ),
     br(),
     p(align = "center", actionButton(ns("save_game_stats"), "Save game stats", 
