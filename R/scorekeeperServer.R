@@ -12,7 +12,7 @@ scorekeeperServer <- function(id, roster_out){
     })
     
     rv <- reactiveValues(roster = NULL, team_id = NULL, game_id = ids::random_id(), 
-                         player_names = NULL, games = NULL, game_stats = NULL,
+                         player_names = NULL, games = games, game_stats = game_stats,
                          game_log = NULL)
     
     observe({
@@ -55,7 +55,7 @@ scorekeeperServer <- function(id, roster_out){
       req(rv[["game_id"]], rv[["team_id"]])
       input$save_game_stats
       # update rv[["games"]] any time game info changes 
-      rv[["games"]] = update_games_row(games, rv[["team_id"]], rv[["game_id"]], gameDate(), 
+      rv[["games"]] = update_games_row(rv[["games"]], rv[["team_id"]], rv[["game_id"]], gameDate(), 
                                        input$opponent, input$team_score, input$opp_score)
       save_state = isTRUE(all.equal(games, rv[["games"]])) & isTRUE(all.equal(game_stats, rv[["game_stats"]]))
       updateActionButton(session, "save_game_stats", disabled = save_state)
