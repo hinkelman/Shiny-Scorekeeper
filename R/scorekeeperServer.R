@@ -1,11 +1,7 @@
 
-
 scorekeeperServer <- function(id, roster_out){
   moduleServer(id, function(input, output, session) {
-    
-    output$rosterWarning <- renderText({
-      if (!is.null(rv[["roster"]])) NULL else "Warning: Need to set roster before scoring a game"
-    })
+    ns = NS(id)
     
     gameDate <- reactive({
       as.character(input$game_date)
@@ -24,7 +20,7 @@ scorekeeperServer <- function(id, roster_out){
     
     gameStats <- reactive({
       # only tallied game stats are stored on disk
-      # this reactive recalculates game stats every time rv[["game_stats"]] is update
+      # this reactive recalculates game stats every time rv[["game_stats"]] is updated
       # not efficient (but sufficient?)
       calc_game_stats(rv[["game_stats"]])
     })
@@ -42,9 +38,15 @@ scorekeeperServer <- function(id, roster_out){
       setNames(rv[["roster"]]$PlayerID, rv[["roster"]]$NameNum)
     })
     
-    observe({
-      updateRadioButtons(session, "selected_player_id", choices = nameNum())
-      updatePickerInput(session, "dnp", choices = nameNum())
+    output$selectedPlayer <- renderUI({
+      validate(need(!is.null(rv[["roster"]]), "Need to set roster before scoring a game"))
+      tagList(
+        radioButtons(ns("selected_player_id"), label = "Select Player", choices = nameNum()),
+        br(),
+        pickerInput(ns("dnp"), label = "Did Not Play (DNP)", choices = nameNum(),
+                    multiple = TRUE, width = "100%", 
+                    options = pickerOptions(size = 7, `live-search` = TRUE))
+      )
     })
     
     nameNumSel <- reactive({
@@ -192,7 +194,7 @@ scorekeeperServer <- function(id, roster_out){
     ## update stats ---------------------------------------------------------
     
     gsSub <- reactive({
-      req(rv[["roster"]])
+      req(rv[["roster"]], input$selected_player_id)
       gs = gameStats()
       gs[gs[["PlayerID"]] == input$selected_player_id & gs[["GameID"]] == rv[["game_id"]], ]
     })
