@@ -121,14 +121,10 @@ rosterServer <- function(id){
       ids <- all_ids[!(all_ids %in% rv_ids)] 
       
       req(!is.null(input$teamsTable_rows_selected) & length(ids) > 0) 
-      
+
       d <- rv[["players"]] |> 
         filter(PlayerID %in% ids) |> 
-        mutate(PlayerName = case_when(
-          is.na(FirstName) & is.na(LastName) ~ NA_character_,
-          is.na(FirstName) ~ LastName,
-          is.na(LastName) ~ FirstName,
-          .default = paste(FirstName, LastName))) |> 
+        mutate(PlayerName = create_player_name(FirstName, LastName)) |> 
         filter(!is.na(PlayerName)) |> 
         arrange(FirstName)
       
