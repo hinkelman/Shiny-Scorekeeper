@@ -13,7 +13,8 @@ scorekeeperServer <- function(id, roster_out){
     
     observe({
       req(roster_out()[["roster"]])
-      rv[["roster"]] = create_player_names(roster_out()[["roster"]])
+      rv[["roster"]] = mutate(roster_out()[["roster"]],
+                              NameNum = create_player_namenum(FirstName, LastName, Number))
       rv[["team_id"]] = rv[["roster"]]$TeamID[1] # same TeamID for all rows in roster_out()[["roster"]]
       rv[["game_stats"]] = add_game_stats(game_stats, rv[["roster"]]$PlayerID, rv[["game_id"]])
     })
