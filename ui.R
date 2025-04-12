@@ -4,6 +4,7 @@ page_navbar(
   fillable = FALSE,
   id = "nav",
   sidebar = sidebar(
+    width = 300,
     conditionalPanel(
       condition = 'input.nav == "Roster"',
       rosterSB("roster")
@@ -11,6 +12,10 @@ page_navbar(
     conditionalPanel(
       condition = 'input.nav == "Scorekeeper"',
       scorekeeperSB("scorekeeper")
+    ),
+    conditionalPanel(
+      condition = 'input.nav == "Stats Viewer"',
+      statsviewerSB("statsviewer")
     )
   ),
   nav_spacer(),
@@ -18,7 +23,8 @@ page_navbar(
             rosterUI("roster")),
   nav_panel("Scorekeeper",
             scorekeeperUI("scorekeeper")),
-  nav_panel("Stats Viewer"),
+  nav_panel("Stats Viewer",
+            statsviewerUI("statsviewer")),
   nav_spacer(),
   nav_menu(title = "About", align = "right",
            nav_panel("Instructions",
@@ -34,35 +40,3 @@ page_navbar(
            )
   )
 )
-
-#       ),
-#       # Stats Viewer -----------------------------------------------------------------
-#       tabItem(tabName = "stats_viewer",
-#               fluidRow(
-#                 column(width = 5,
-#                        h3("Teams"),
-#                        actionButton('teams_selectall', 'Select all'),
-#                        actionButton('teams_deselectall', 'Deselect all'),
-#                        DTOutput("teamsTableStatsViewer")
-#                 ),
-#                 column(width = 7,
-#                        h3("Games"),
-#                        hidden(actionButton('games_selectall', 'Select all')),
-#                        hidden(actionButton('games_deselectall', 'Deselect all')),
-#                        h4(id = "select_teams_row_msg", "Select row(s) in Teams table on left to view games"),
-#                        DTOutput("gamesTable")
-#                 )
-#               ),
-#               br(),
-#               h3("Statistics"),
-#               h4(textOutput("statisticsMessage")),
-#               hidden(pickerInput("stats_group_by", "Group by", choices = stats_group_by_opts, 
-#                                  multiple = TRUE, selected = stats_group_by_opts)),
-#               uiOutput("selectedPlayers"),
-#               hidden(radioGroupButtons(inputId = "stats_type", label = NULL, choices = c("Per game", "Total"))),    
-#               DTOutput("statisticsTable"),
-#               br()
-#       )
-#     )
-#   )
-# )

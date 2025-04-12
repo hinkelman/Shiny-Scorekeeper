@@ -1,7 +1,9 @@
+options(dplyr.summarise.inform = FALSE)
 library(shiny)
 library(bslib)
 library(shinyWidgets)
 library(DT)
+library(reactable)
 library(dplyr)
 library(tidyr)
 library(scorekeepeR)
@@ -29,6 +31,5 @@ game_stats = if (file.exists(game_stats_file)) read.csv(game_stats_file) else in
 
 if (!dir.exists(file.path(data_dir, "gamelogs"))) dir.create(file.path(data_dir, "gamelogs"))
 
-# stats_group_by_opts <- c("Team", "Game" = "GameID", "Player" = "PlayerID")
-
+group_by_opts <- c("Team" = "TeamID", "Game" = "GameID", "Player" = "PlayerID")
 
