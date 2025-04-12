@@ -229,7 +229,7 @@ scorekeeperServer <- function(id, roster_out){
     
     output$threePtPer <- renderText({ 
       req(rv[["roster"]])
-      per = gsSub()[["3PT%"]] 
+      per = gsSub()[["3P%"]] 
       if (is.na(per)) "--" else paste0(per, "%")
     })
     
