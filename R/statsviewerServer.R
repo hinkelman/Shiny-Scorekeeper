@@ -159,15 +159,15 @@ statsviewerServer <- function(id, roster_out, scorekeeper_out){
       
       dfx = gameStatsDisplay()
       types = sapply(dfx, class)
-      chars = sapply(dfx, function(x) max(nchar(x)))
+      chars = sapply(dfx, function(x) max(nchar(x), na.rm = TRUE))
       
       col_widths <- function(type, chars){
-        colDef(minWidth = if (type %in% c("integer", "numeric")) 60 else chars*12)
+        colDef(minWidth = if (type %in% c("integer", "numeric")) 70 else chars*12 + 16)
       }
       
       reactable(dfx,
                 bordered = TRUE,
-                striped = TRUE,
+                highlight = TRUE,
                 defaultColDef = colDef(
                   defaultSortOrder = "desc",
                   headerStyle = list(background = "#f7f7f8")),
