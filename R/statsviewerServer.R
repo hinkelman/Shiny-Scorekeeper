@@ -11,28 +11,38 @@ statsviewerServer <- function(id, roster_out, scorekeeper_out){
       updatePickerInput(session, "leagues", choices = opts, selected = opts)
     })
     
+    teamsSub1 <- reactive({
+      dfx = roster_out()[["teams"]]
+      dfx[dfx[["League"]] %in% input$leagues, ]
+    })
+    
     observe({
-      dfx = filter(roster_out()[["teams"]], League %in% input$leagues)
+      dfx = teamsSub1()
       opts = sort(unique(dfx$Team))
       freezeReactiveValue(input, "teams")
       updatePickerInput(session, "teams", choices = opts, selected = opts)
     })
     
+    teamsSub2 <- reactive({
+      dfx = teamsSub1()
+      dfx[dfx[["Team"]] %in% input$teams, ]
+    })
+    
     observe({
-      dfx = filter(roster_out()[["teams"]], League %in% input$leagues & Team %in% input$teams)
+      dfx = teamsSub2()
       opts = sort(unique(dfx$Season))
       freezeReactiveValue(input, "seasons")
       updatePickerInput(session, "seasons", choices = opts, selected = opts)
     })
     
-    teamsSub <- reactive({
-      roster_out()[["teams"]] |> 
-        filter(League %in% input$leagues & Team %in% input$teams & Season %in% input$seasons)
+    teamsSub3 <- reactive({
+      dfx = teamsSub2()
+      dfx[dfx[["Season"]] %in% input$seasons, ]
     })
     
     gamesSubTmp <- reactive({
       scorekeeper_out()[["games"]] |>
-        filter(TeamID %in% teamsSub()$TeamID) |>
+        filter(TeamID %in% teamsSub3()$TeamID) |>
         mutate(Margin = TeamScore - OpponentScore)
     })
     
@@ -69,7 +79,7 @@ statsviewerServer <- function(id, roster_out, scorekeeper_out){
       scorekeeper_out()[["game_stats"]] |> 
         filter(GameID %in% gamesSub()$GameID) |>
         left_join(gamesSub(), by = join_by(GameID)) |> 
-        left_join(teamsSub(), by = join_by(TeamID)) |>
+        left_join(teamsSub3(), by = join_by(TeamID)) |>
         left_join(roster_out()[["players"]], by = join_by(PlayerID))
     })
     
