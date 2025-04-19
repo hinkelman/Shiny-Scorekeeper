@@ -40,45 +40,53 @@ statsviewerServer <- function(id, roster_out, scorekeeper_out){
       dfx[dfx[["Season"]] %in% input$seasons, ]
     })
     
-    gamesSubTmp <- reactive({
-      scorekeeper_out()[["games"]] |>
-        filter(TeamID %in% teamsSub3()$TeamID) |>
-        mutate(Margin = TeamScore - OpponentScore)
+    gamesSub1 <- reactive({
+      dfx = scorekeeper_out()[["games"]]
+      dfx = dfx[dfx$TeamID %in% teamsSub3()$TeamID, ]
+      mutate(dfx, Margin = TeamScore - OpponentScore)
     })
     
     observe({
-      req(nrow(gamesSubTmp()) > 0)
-      mn = min(gamesSubTmp()$Margin, na.rm = TRUE)
-      mx = max(gamesSubTmp()$Margin, na.rm = TRUE)
+      req(nrow(gamesSub1()) > 0)
+      mn = min(gamesSub1()$Margin, na.rm = TRUE)
+      mx = max(gamesSub1()$Margin, na.rm = TRUE)
       freezeReactiveValue(input, "margin")
       updateSliderInput(session, "margin", min = mn, max = mx, value = c(mn, mx))
     })
     
+    gamesSub2 <- reactive({
+      dfx = gamesSub1()
+      dfx[dfx$Margin >= input$margin[1] & dfx$Margin <= input$margin[2], ]
+    })
+    
     observe({
-      dfx = filter(gamesSubTmp(), Margin >= input$margin[1] & Margin <= input$margin[2])
+      dfx = gamesSub2()
       opts = sort(unique(dfx$Opponent))
       freezeReactiveValue(input, "opponents")
       updatePickerInput(session, "opponents", choices = opts, selected = opts)
     })
     
+    gamesSub3 <- reactive({
+      dfx = gamesSub2()
+      dfx[dfx$Opponent %in% input$opponents, ]
+    })
+    
     observe({
-      dfx = gamesSubTmp() |> 
-        filter(Margin >= input$margin[1] & Margin <= input$margin[2] & Opponent %in% input$opponents)
+      dfx = gamesSub3()
       opts = sort(unique(dfx$Date))
       freezeReactiveValue(input, "dates")
       updatePickerInput(session, "dates", choices = opts, selected = opts)
     })
     
-    gamesSub<- reactive({
-      gamesSubTmp() |>
-        filter(Margin >= input$margin[1] & Margin <= input$margin[2] & 
-                 Opponent %in% input$opponents & Date %in% input$dates)
+    gamesSub4 <- reactive({
+      dfx = gamesSub3()
+      dfx[dfx$Date %in% input$dates, ]
     })
     
     gameStatsSub <- reactive({
       scorekeeper_out()[["game_stats"]] |> 
-        filter(GameID %in% gamesSub()$GameID) |>
-        left_join(gamesSub(), by = join_by(GameID)) |> 
+        filter(GameID %in% gamesSub4()$GameID) |>
+        left_join(gamesSub4(), by = join_by(GameID)) |> 
         left_join(teamsSub3(), by = join_by(TeamID)) |>
         left_join(roster_out()[["players"]], by = join_by(PlayerID))
     })
