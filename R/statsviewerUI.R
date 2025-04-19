@@ -28,7 +28,7 @@ statsviewerUI <- function(id){
     layout_columns(
       col_widths = c(3, 3, 2, 4),
       pickerInput(ns("group_by"), "Group by", choices = group_by_opts, 
-                  multiple = TRUE, width = "100%", selected = group_by_opts),
+                  multiple = TRUE, width = "100%", selected = c("TeamID", "PlayerID")),
       uiOutput(ns("selectedPlayers")),
       conditionalPanel(
         condition = 'input.group_by.indexOf("GameID") === -1',
