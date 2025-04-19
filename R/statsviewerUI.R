@@ -30,8 +30,11 @@ statsviewerUI <- function(id){
       pickerInput(ns("group_by"), "Group by", choices = group_by_opts, 
                   multiple = TRUE, width = "100%", selected = group_by_opts),
       uiOutput(ns("selectedPlayers")),
-      radioButtons(ns("stats_type"), label = "Statistics", choices = c("Per game", "Total"), 
-                   width = "100%"),
+      conditionalPanel(
+        condition = 'input.group_by.indexOf("GameID") === -1',
+        radioButtons(ns("stats_type"), label = "Statistics", choices = c("Per game", "Total")),
+        ns = NS(id)
+      ),
       p()
     ),
     reactableOutput(ns("table"))
