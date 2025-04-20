@@ -7,7 +7,6 @@ statsviewerServer <- function(id, roster_out, scorekeeper_out){
     observe({
       dfx = roster_out()[["teams"]]
       opts = sort(unique(dfx$League))
-      freezeReactiveValue(input, "leagues")
       updatePickerInput(session, "leagues", choices = opts, selected = opts)
     })
     
@@ -19,7 +18,6 @@ statsviewerServer <- function(id, roster_out, scorekeeper_out){
     observe({
       dfx = teamsSub1()
       opts = sort(unique(dfx$Team))
-      freezeReactiveValue(input, "teams")
       updatePickerInput(session, "teams", choices = opts, selected = opts)
     })
     
@@ -31,7 +29,6 @@ statsviewerServer <- function(id, roster_out, scorekeeper_out){
     observe({
       dfx = teamsSub2()
       opts = sort(unique(dfx$Season))
-      freezeReactiveValue(input, "seasons")
       updatePickerInput(session, "seasons", choices = opts, selected = opts)
     })
     
@@ -50,7 +47,6 @@ statsviewerServer <- function(id, roster_out, scorekeeper_out){
       req(nrow(gamesSub1()) > 0)
       mn = min(gamesSub1()$Margin, na.rm = TRUE)
       mx = max(gamesSub1()$Margin, na.rm = TRUE)
-      freezeReactiveValue(input, "margin")
       updateSliderInput(session, "margin", min = mn, max = mx, value = c(mn, mx))
     })
     
@@ -62,7 +58,6 @@ statsviewerServer <- function(id, roster_out, scorekeeper_out){
     observe({
       dfx = gamesSub2()
       opts = sort(unique(dfx$Opponent))
-      freezeReactiveValue(input, "opponents")
       updatePickerInput(session, "opponents", choices = opts, selected = opts)
     })
     
@@ -74,7 +69,6 @@ statsviewerServer <- function(id, roster_out, scorekeeper_out){
     observe({
       dfx = gamesSub3()
       opts = sort(unique(dfx$Date))
-      freezeReactiveValue(input, "dates")
       updatePickerInput(session, "dates", choices = opts, selected = opts)
     })
     
