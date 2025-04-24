@@ -7,8 +7,8 @@ Initially, the `Teams` table is empty. Add a row and double-click on cells to ed
 
 #### Score Game
 
-When scoring a game, it is often useful to hide the sidebar (via hamburger button) to optimize the window size for collecting and viewing stats but do not forget to enter and save game info. The full roster is shown on the left side the scorekeeper buttons. Clicking on the scorekeeper buttons changes the stats of the player selected in the roster menu. Toggling `UNDO` between off and on changes whether clicking on a scorekeeper button increments or decrements a statistic, respectively. Selecting the players that did not play allows for correct tallying of per game statistics. Saving game info and game stats makes the game stats immediately available through the Stats Viewer.
+When scoring a game, it is often useful to hide the sidebar to optimize the window size for collecting and viewing stats but do not forget to enter and save game info. The full roster is shown on the left side the scorekeeper buttons. Clicking on the scorekeeper buttons changes the stats of the player selected in the roster menu. Toggling `UNDO` between off and on changes whether clicking on a scorekeeper button increments or decrements a statistic, respectively. Selecting the players that did not play allows for correct tallying of per game statistics. Game stats are immediately available through the Stats Viewer, but need to be saved to for viewing in a new session. 
 
 #### View Statistics
 
-View statistics by selecting one or more rows in the Teams and Games tables. Sort tables by clicking on column names. Summarize statistics at game, season, or "career" level by choosing different combinations of `Team`, `Game`, and `Player` from the `Group by` dropdown menu. For example, selecting only `Player` from `Group by` generates "career" statistics (assuming that all teams and games were selected for that player in the `Teams` and `Games` tables).
+Modify the summary stats table with the filter options in the sidebar and by choosing different combinations of `Team`, `Game`, and `Player` from the `Group by` dropdown menu. Click on column names to sort columns. 
