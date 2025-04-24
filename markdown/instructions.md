@@ -1,5 +1,5 @@
 
-<a href="https://www.travishinkelman.com/project/shiny-scorekeeper/" target="_blank">Shiny Scorekeeper</a> is a basketball scorekeeper app built with the Shiny web framework for R. All of the code for the app is available on <a href="https://github.com/hinkelman/Shiny-Scorekeeper" target="_blank">GitHub.</a> The app is designed for use on a desktop computer while watching film of a game, i.e., not intended for mobile use at a live game. Below are brief instructions on how to use the key features of the app.
+Shiny Scorekeeper is a basketball scorekeeper app built with the Shiny web framework for R. All of the code for the app is available on <a href="https://github.com/hinkelman/Shiny-Scorekeeper" target="_blank">GitHub.</a> The app is designed for use on a desktop computer while watching film of a game, i.e., not intended for mobile use at a live game. Below are brief instructions on how to use the key features of the app.
 
 #### Create and Set Roster
 
