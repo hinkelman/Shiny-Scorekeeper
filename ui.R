@@ -28,7 +28,6 @@ page_navbar(
   nav_spacer(),
   nav_menu(title = "About", align = "right",
            nav_panel("Instructions",
-                     includeCSS("custom-css.css"),
                      card(
                        includeMarkdown(file.path("markdown", "instructions.md"))
                      )
