@@ -12,6 +12,8 @@ The following is a list of features that I decided not to pursue.
 * Adding mechanisms to import and export data through the app. 
 * Ability to edit or delete games, game stats, and game logs in the app.  
 * Tracking minutes played for calculating stats on a per minute basis.
+* Tracking stats by period (i.e., quarter or half).
+* Final team scores are entered, not calculated from individual game stats.
 * Including win-loss record in team-level summary statistics.
 * Presenting confirmation message when trying to close app with unsaved changes.
 
