@@ -20,7 +20,10 @@ remotes::install_github("hinkelman/scorekeepeR")
 shiny::runApp()
 ```
 
-Instructions for how to use the app are found [here](https://github.com/hinkelman/Shiny-Scorekeeper/blob/master/instructions.md). Background information about the app is found [here](https://github.com/hinkelman/Shiny-Scorekeeper/blob/master/background.md). 
+Instructions for how to use the app are found [here](https://github.com/hinkelman/Shiny-Scorekeeper/blob/master/instructions.md). Background information about the app is found [here](https://github.com/hinkelman/Shiny-Scorekeeper/blob/master/background.md).   
 
-![roster](docs/img/roster.png)
-![stats](docs/img/stats.png)
+![roster](docs/img/roster.png)  
+
+![stats](docs/img/stats.png)  
+
+![game log](docs/img/gamelog.png)
