@@ -119,7 +119,8 @@ statsviewerServer <- function(id, roster_out, scorekeeper_out){
       if ("TeamID" %in% input$group_by) {
         gb = c(gb, "Team")
         # Create Team to represent Opponent (which was recorded as the FirstName on a roster)
-        out = mutate(out, Team = ifelse(FirstName == "Opponent", Opponent, Team)) 
+        out[which(out$FirstName == "Opponent"), c("Team", "Opponent")] = 
+          rev(out[which(out$FirstName == "Opponent"), c("Team", "Opponent")])
       }
       
       if ("GameID" %in% input$group_by) {
