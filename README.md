@@ -25,5 +25,3 @@ Instructions for how to use the app are found [here](https://github.com/hinkelma
 ![roster](docs/img/roster.png)  
 
 ![stats](docs/img/stats.png)  
-
-![game log](docs/img/gamelog.png)
