@@ -1,66 +1,35 @@
+options(dplyr.summarise.inform = FALSE)
 library(shiny)
-library(shinydashboard)
+library(bslib)
 library(shinyWidgets)
-library(shinyjs)
 library(DT)
+library(reactable)
 library(dplyr)
 library(tidyr)
+library(scorekeepeR)
 
-if (!dir.exists("gamelogs")) dir.create("gamelogs")
+# max height of value boxes
+mxht = "120px"
 
-stats_group_by_opts <- c("Team", "Game" = "GameID", "Player" = "PlayerID")
+data_dir = "data"
+if (!dir.exists(data_dir)) dir.create(data_dir)
 
-first_num <- function(first, num){
-  # assumes that roster includes at least first name or number
-  ifelse(num == "" | is.na(num), first,
-         ifelse(first == "" | is.na(first),
-                paste0("#", num),
-                paste0(first, " (#", num, ")")))
-}
+teams_file = file.path(data_dir, "Teams.csv")
+teams = if (file.exists(teams_file)) read.csv(teams_file) else init_teams_table()
 
-first_last <- function(first, last){
-  ifelse(last == "", first, paste(first, last))
-}
+players_file = file.path(data_dir, "Players.csv")
+players = if (file.exists(players_file)) read.csv(players_file) else init_players_table()
 
-log_action <- function(undo_bool, game_log_text, player){
-  undo = ifelse(undo_bool, "UNDO ", "")
-  paste0(undo, game_log_text, player)
-}
+rosters_file = file.path(data_dir, "Rosters.csv")
+rosters = if (file.exists(rosters_file)) read.csv(rosters_file, colClasses = "character") else rosters = init_rosters_table()
 
-display_shooting <- function(data, ri, stat, ma = NULL){
-  # ma = is length 2 vector of made and attempted
-  dri = data[ri,]
-  raw.value = dri[[stat]]
-  # rv was probably short for render value; not sure about the t
-  rvt = "--"                # initial value for renderValueBox
-  # st = subtitle for renderValueBox
-  rvt.st = ifelse(stat == "TS%", "TS%", paste0(ma[1], " (0/0)"))
-  if (length(raw.value) > 0){  
-    if(!is.na(raw.value)){
-      rvt = paste0(raw.value, "%")
-      rvt.st = ifelse(stat == "TS%", "TS%", paste0(stat, " (", dri[[ma[1]]], "/", dri[[ma[2]]], ")"))
-    }
-  }
-  c(rvt, rvt.st)
-}
+games_file = file.path(data_dir, "Games.csv")
+games = if (file.exists(games_file)) read.csv(games_file) else init_games_table()
 
-true_shooting <- function(PTS, FTA, FGA){
-  # https://en.wikipedia.org/wiki/True_shooting_percentage
-  PTS/(0.88 * FTA + 2 * FGA) * 100
-}
+game_stats_file = file.path(data_dir, "GameStats.csv")
+game_stats = if (file.exists(game_stats_file)) read.csv(game_stats_file) else init_game_stats_table()
 
-efficiency = function(PTS, REB, AST, STL, BLK, FGA, FGM, FTA, FTM, TOV){
-  # https://en.wikipedia.org/wiki/Efficiency_(basketball)
-  PTS + REB + AST + STL + BLK - (FGA - FGM) - (FTA - FTM) - TOV
-}
+if (!dir.exists(file.path(data_dir, "gamelogs"))) dir.create(file.path(data_dir, "gamelogs"))
 
-# counting stats stored in GameStats.csv
-# points and rebounds are only columns that could be calculated from other columns
-stats_cols = c("FTM", "FTA", "FGM2", "FGA2", "FGM3", "FGA3", "TOV", "STL", 
-               "DREB", "OREB", "BLK", "AST", "PF", "PTS", "REB", "DNP")
-
-# common columns used for statistics display
-stats_display_cols = c("PTS", "FGM", "FGA", "FG%", "3PM" = "FGM3", "3PA" = "FGA3", "3P%", 
-                       "FTM", "FTA", "FT%", "TS%", "OREB", "DREB", "REB", "AST", "TOV", "STL", "BLK", "PF")
-
+group_by_opts <- c("Team" = "TeamID", "Game" = "GameID", "Player" = "PlayerID")
 
