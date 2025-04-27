@@ -12,7 +12,7 @@ Shiny Scorekeeper is a basketball scorekeeper app built with the Shiny web frame
 4. Navigate to directory with the repository
 5. From the R console, run the following code to install required packages (only needs to be done once)
 ```
-install.packages(c("shiny", "bslib", "shinyWidgets", "reactable", "DT", "dplyr", "tidyr", "remotes"), dependencies = TRUE)
+install.packages(c("shiny", "bslib", "shinyWidgets", "reactable", "DT", "dplyr", "tidyr", "markdown", "remotes",), dependencies = TRUE)
 remotes::install_github("hinkelman/scorekeepeR")
 ```
 6. Run the following code to launch the app
