@@ -19,7 +19,7 @@ rosterServer <- function(id){
     
     observe({
       req(nrow(rv[["teams"]]) > 0)
-      state = if (is.null(input$teamsTable_rows_selected)) TRUE else FALSE
+      state = is.null(input$teamsTable_rows_selected)
       updateActionButton(session, "delete_teams_row", disabled = state)
       updateActionButton(session, "add_roster_row", disabled = state)
     })
@@ -77,7 +77,7 @@ rosterServer <- function(id){
     
     observe({
       req(nrow(rv[["roster"]]) > 0)
-      state = if (is.null(input$rosterView_rows_selected)) TRUE else FALSE
+      state = is.null(input$rosterView_rows_selected)
       updateActionButton(session, "delete_roster_row", disabled = state)
     })
     
@@ -152,12 +152,6 @@ rosterServer <- function(id){
       
       rv[["roster"]] <- create_roster_view(team_id, rv[["players"]], rv[["rosters"]])
       replaceData(proxyRoster, rv[["roster"]], resetPaging = FALSE, rownames = FALSE)  
-    })
-    
-    observe({
-      req(nrow(rv[["roster"]]) > 0)
-      state = if (is.null(input$rosterView_rows_selected)) TRUE else FALSE
-      updateActionButton(session, "delete_roster_row", disabled = state)
     })
     
     observe({
