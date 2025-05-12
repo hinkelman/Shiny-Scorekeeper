@@ -26,7 +26,7 @@ statsviewerUI <- function(id){
   ns <- NS(id)
   tagList(
     layout_columns(
-      col_widths = c(3, 3, 2, 4),
+      col_widths = c(3, 3, 2, -4),
       pickerInput(ns("group_by"), "Group by", choices = group_by_opts, 
                   multiple = TRUE, width = "100%", selected = c("TeamID", "PlayerID")),
       uiOutput(ns("selectedPlayers")),
@@ -34,8 +34,7 @@ statsviewerUI <- function(id){
         condition = 'input.group_by.indexOf("GameID") === -1',
         radioButtons(ns("stats_type"), label = "Statistics", choices = c("Per game", "Total")),
         ns = NS(id)
-      ),
-      p()
+      )
     ),
     reactableOutput(ns("table"))
   )

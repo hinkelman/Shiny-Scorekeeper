@@ -59,11 +59,9 @@ scorekeeperUI <- function(id){
           actionButton(ns("ast"), "Assist")
         ),
         layout_columns(
-          col_widths = c(6, 2, 2, 2),
+          col_widths = c(6, -2, 2, -2),
           actionButton(ns("pf"), "Foul"),
-          p(),
-          input_switch(ns("undo"), label = "UNDO"),
-          p()
+          input_switch(ns("undo"), label = "UNDO")
         ),
         br(),
         h5(align = "center", textOutput(ns("gameLogLastTitle"))),
