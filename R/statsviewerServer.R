@@ -44,7 +44,8 @@ statsviewerServer <- function(id, roster_out, scorekeeper_out){
     })
     
     observe({
-      req(nrow(gamesSub1()) > 0)
+      # in-progress game has NA scores until scores are entered
+      req(any(!is.na(gamesSub1()$Margin)))
       mn = min(gamesSub1()$Margin, na.rm = TRUE)
       mx = max(gamesSub1()$Margin, na.rm = TRUE)
       updateSliderInput(session, "margin", min = mn, max = mx, value = c(mn, mx))
