@@ -71,8 +71,8 @@ scorekeeperServer <- function(id, roster_out){
       # update non-reactive versions to keep track of changes
       games <<- rv[["games"]]
       game_stats <<- rv[["game_stats"]]
-      cat(c(gameLogHeader(), rv[["game_log"]]), file = gameLogPath(), sep = "\n") 
-    })
+      cat(c(gameLogHeader(), rv[["game_log"]]), file = gameLogPath(), sep = "\n")
+    }, priority = 1) # run before observer that sets save button state
     
     output$gameLogLastTitle <- renderText({
       out = ""

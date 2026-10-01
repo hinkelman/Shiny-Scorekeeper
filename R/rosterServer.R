@@ -176,7 +176,7 @@ rosterServer <- function(id){
       teams <<- rv[["teams"]]
       players <<- rv[["players"]]
       rosters <<- rv[["rosters"]]
-    })
+    }, priority = 1) # run before observer that sets save button state
     
     # return teams and roster
     reactive(list("teams" = rv[["teams"]],
